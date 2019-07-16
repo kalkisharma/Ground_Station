@@ -118,7 +118,7 @@ class command_page(tk.Frame):
         self.sendcommand_btn = tk.Button(
             self,
             text="Send Command",
-            command=lambda: self.send_command(),
+            command=lambda: self.send_command(controller),
             bg="gray"
         )
         self.sendcommand_btn.grid(row=0, column=3)
@@ -135,17 +135,34 @@ class command_page(tk.Frame):
         self.text = audio_to_text.split()[0]
 
 
-    def send_command(self):
+    def send_command(self, controller):
         dist = 0.1
         text = self.text
+        gui = controller.gui
         if 'for' in text:
             print(f"MOVE FORWARD {dist}m")
+            gui.server.x_desired = gui.server.current_x + 0.1
         elif 'back' in text:
             print(f"MOVE BACKWARD {dist}m")
+            gui.server.x_desired = gui.server.current_x - 0.1
         elif 'left' in text:
             print(f"MOVE LEFT {dist}m")
+            gui.server.y_desired = gui.server.current_y - 0.1
         elif 'right' in text:
             print(f"MOVE RIGHT {dist}m")
+            gui.server.y_desired = gui.server.current_y + 0.1
+        elif 'disarm' in text:
+            print("DISARMING")
+            gui.server.msg_payload_send = [400, 0, 0, 0, 0, 0, 0, 0]
+        elif 'arm' in text:
+            print('ARMING')
+            gui.server.msg_payload_send = [400, 1, 0, 0, 0, 0, 0, 0]
+        elif 'disable' in text:
+            print('DISABLING OFFBOARD')
+            gui.server.msg_payload_send = [92, 0, 0, 0, 0, 0, 0, 0]
+        elif 'enable' in text:
+            print('ENABLING OFFBOARD')
+            gui.server.msg_payload_send = [92, 1, 0, 0, 0, 0, 0, 0]
         else:
             print("NAHHHH\nSAY EITHER LEFT/RIGHT/BACK/FORWARD YOU SILLY GOOSE!")
         #self.update_setpoint()

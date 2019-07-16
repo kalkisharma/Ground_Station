@@ -85,7 +85,7 @@ class MAVServer:
         self.recv_thread.join()
 
     def send_thread(self):
-
+        print("STARTING SEND THREAD")
         while True:
 
             # SETPOINTS
@@ -117,6 +117,7 @@ class MAVServer:
 
                 if msg_payload_send[0] > 0:
                     #send the command
+                    print("SENDING COMMAND")
                     self.server.mav.command_long_send(
                         1, # autopilot system id
                         1, # autopilot component id
@@ -145,9 +146,9 @@ class MAVServer:
                         1,
                         1
                     )
-
+                self.msg_payload_send[0] = 0
             time.sleep(1/self.msg_per_second)
-            self.msg_payload_send[0] = 0
+
 
     def recv_msg(self):
 
