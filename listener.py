@@ -19,8 +19,6 @@ class AudioRecorder():
         self.audio = pyaudio.PyAudio()
         self.frames = []
         self.stream = []
-        self.keyword = ''
-        self.command = ''
         self.record_thread = None
         self.listening = False
 
@@ -84,34 +82,23 @@ class AudioRecorder():
         file = sr.AudioFile(self.WAVE_OUTPUT_FILENAME)
         with file as source:
             audio = r.record(source)
-
         try:
             return(r.recognize_google(audio, show_all=True)['alternative'][0]['transcript'])
         except:
             return('')
 
-    def keyword_listener(self, keyword='hello'):
-        self.keyword = keyword
-        self.listen_thread = threading.Thread(target=self._listen)
-        self.listen_thread.start()
-
-    def _listen(self, loop_time=3, listen_time=5):
-        #ar = AudioRecorder()
-        print("RUNNING LISTENING THREAD")
-        while True:
-            self.start_recording()
-            time.sleep(loop_time)
-            self.stop_recording()
-            text = self.recognize_recording()
-            if text!='':
-                print(text)
-            if self.keyword in text:
-                print('SPEAK COMMAND')
-                self.start_recording()
-                self.listening = True
-                time.sleep(listen_time)
-                self.stop_recording()
-                text = self.recognize_recording()
-                print(f'COMMAND: {text}')
-                self.command = text
-                self.listening = False
+if __name__=='__main__':
+    ar = AudioRecorder()
+    while True:
+        ar.start_recording()
+        time.sleep(2)
+        ar.stop_recording()
+        text = ar.recognize_recording()
+        if 'hey baby' in text:
+            print('Speak Command')
+            ar.start_recording()
+            ar.listening = True
+            time.sleep(5)
+            ar.stop_recording()
+            text = ar.recognize_recording()
+            print(text)

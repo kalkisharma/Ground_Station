@@ -1,6 +1,6 @@
 import tkinter as tk
 import audio_recorder as ar
-
+import threading
 WINDOW_WIDTH = 600
 WINDOW_HEIGHT = 600
 
@@ -76,6 +76,95 @@ class Window(tk.Tk):
         frame.grid(row=0, column=0, sticky="nsew")
         frame.tkraise()
 
+class command_page(tk.Frame):
+
+    def __init__(self, parent, controller):
+
+        tk.Frame.__init__(self, parent)
+
+        self.recorder = ar.AudioRecorder()
+        self.canvas = tk.Canvas(self, width=150, height=150, bg="white")
+        self.canvas.grid(row=0, column=0, rowspan=1, columnspan=1)
+        self.oval_listening = self.canvas.create_oval(25, 25, 125, 125, fill="red")
+        self.recorder.keyword_listener(keyword='hey baby')
+        self.start_listening_check(controller)
+
+        textbox = tk.Text(self)#, width=100, height=100,)
+        textbox.grid(row=1, column=0, rowspan=1, columnspan=1)
+        textbox.insert(tk.END,'IF RED -> SPEAK KEYWORD.\nIF GREEN -> SPEAK COMMAND')
+
+    def start_listening_check(self, controller):
+        self.listen_check_thread = threading.Thread(target=self._listen_check, args=(controller,))
+        self.listen_check_thread.start()
+
+    def _listen_check(self, controller):
+        while True:
+            if self.recorder.listening:
+                self.canvas.itemconfig(self.oval_listening, fill="green")
+                if self.recorder.command!='':
+                    self.send_command(controller)
+            else:
+                self.canvas.itemconfig(self.oval_listening, fill="red")
+                self.recorder.command = ''
+
+    def send_command(self, controller):
+        dist = 0.1
+        text = self.recorder.command
+        gui = controller.gui
+        if 'for' in text:
+            print(f"MOVE FORWARD {dist}m")
+            gui.server.x_desired = gui.server.current_x + 0.1
+        elif 'back' in text:
+            print(f"MOVE BACKWARD {dist}m")
+            gui.server.x_desired = gui.server.current_x - 0.1
+        elif 'left' in text:
+            print(f"MOVE LEFT {dist}m")
+            gui.server.y_desired = gui.server.current_y - 0.1
+        elif 'right' in text:
+            print(f"MOVE RIGHT {dist}m")
+            gui.server.y_desired = gui.server.current_y + 0.1
+        elif 'take' in text:
+            print(f"TAKEOFF {dist}m")
+            gui.server.z_desired = gui.server.current_z + 1.0
+        elif 'land' in text:
+            print(f"LAND {dist}m")
+            gui.server.z_desired = gui.server.current_z - 1.0
+        elif 'up' in text:
+            print(f"MOVE UP {dist}m")
+            gui.server.z_desired = gui.server.current_z + 0.1
+        elif 'down' in text:
+            print(f"MOVE DOWN {dist}m")
+            gui.server.z_desired = gui.server.current_z - 0.1
+        elif 'disarm' in text:
+            print("DISARMING")
+            gui.server.msg_payload_send = [400, 0, 0, 0, 0, 0, 0, 0]
+        elif 'arm' in text:
+            print('ARMING')
+            gui.server.msg_payload_send = [400, 1, 0, 0, 0, 0, 0, 0]
+        elif 'disable' in text:
+            print('DISABLING OFFBOARD')
+            gui.server.msg_payload_send = [92, 0, 0, 0, 0, 0, 0, 0]
+        elif 'enable' in text:
+            print('ENABLING OFFBOARD')
+            gui.server.msg_payload_send = [92, 1, 0, 0, 0, 0, 0, 0]
+        else:
+            print("YOU DID NOT ENTER A COMMAND!")
+        """
+        while True:
+            self.ar.start_recording()
+            time.sleep(2)
+            self.ar.stop_recording()
+            text = self.ar.recognize_recording()
+            if 'hey baby' in text:
+                print('Speak Command')
+                self.ar.start_recording()
+                self.ar.listening = True
+                time.sleep(5)
+                self.ar.stop_recording()
+                text = self.ar.recognize_recording()
+                print(text)
+        """
+"""
 class command_page(tk.Frame):
 
     def __init__(self, parent, controller):
@@ -166,7 +255,7 @@ class command_page(tk.Frame):
         else:
             print("NAHHHH\nSAY EITHER LEFT/RIGHT/BACK/FORWARD YOU SILLY GOOSE!")
         #self.update_setpoint()
-
+"""
 def main(gui):
     root = tk.Tk()
     app = Window(root, gui)
