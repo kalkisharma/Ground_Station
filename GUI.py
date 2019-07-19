@@ -1,13 +1,50 @@
 import tkinter as tk
 import audio_recorder as ar
 import threading
-WINDOW_WIDTH = 600
-WINDOW_HEIGHT = 600
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from matplotlib.figure import Figure
+import numpy as np
+import cv2
+import math
+import time
+
+WINDOW_WIDTH = 800
+WINDOW_HEIGHT = 800
 
 DUAL_MONITOR = False
 
+class MyVideoCapture:
+
+    def __init__(self, video_source=0):
+        self.vid = cv2.VideoCapture('udpsrc port=5000 caps = "application/x-rtp, media=(string)video, clock-rate=(int)90000, encoding-name=(string)H264, payload=(int)96" ! rtph264depay ! decodebin ! videoconvert ! appsink', cv2.CAP_GSTREAMER)
+        #self.vid = cv2.VideoCapture(video_source)
+        self.video_source = video_source
+        if not self.vid.isOpened():
+            raise ValueError("Unable to open video source", video_source)
+
+        # Get video source width and height
+        self.width = self.vid.get(cv2.CAP_PROP_FRAME_WIDTH)
+        self.height = self.vid.get(cv2.CAP_PROP_FRAME_HEIGHT)
+
+    # Release the video source when the object is destroyed
+    def __del__(self):
+        if self.vid.isOpened():
+            self.vid.release()
+            self.window.mainloop()
+
+    def get_frame(self):
+        if self.vid.isOpened():
+            ret, frame = self.vid.read()
+            if ret:
+                # Return a boolean success flag and the current frame converted to BGR
+                return (ret, cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
+            else:
+                return (ret, None)
+        else:
+            return (ret, None)
+
 class GUI:
-    def __init__(self, _server):
+    def __init__(self, _server=None):
         self.start = True
         self.server = _server
         self.setpoint = [0,0,0]
@@ -83,16 +120,90 @@ class command_page(tk.Frame):
         tk.Frame.__init__(self, parent)
 
         self.recorder = ar.AudioRecorder()
-        self.canvas = tk.Canvas(self, width=150, height=150, bg="white")
-        self.canvas.grid(row=0, column=0, rowspan=1, columnspan=1)
-        self.oval_listening = self.canvas.create_oval(25, 25, 125, 125, fill="red")
+        self.create_listener_canvas()
         self.recorder.keyword_listener(keyword='hey baby')
         self.start_listening_check(controller)
 
+        self.create_graph_canvas()
+        self.start_plot_thread()
+        self.start_video_thread()
+
+    def start_video_thread(self):
+        self.video_thread = threading.Thread(target=self._vide)
+        self.video_thread.start()
+
+    def _video(self):
+        self.vid = MyVideoCapture()
+        self.panel = None
+
+
+        ret, frame = self.vid.get_frame()
+
+        while not ret:
+            ret, frame = self.vid.get_frame()
+
+        image = PIL.ImageTk.PhotoImage(PIL.Image.fromarray(frame))
+        self.panel = tk.Label(self, image=image)
+        self.panel.image = image
+        self.panel.grid(row=0, column=5)#, rowspan=100, padx=15)
+
+        while True:
+            ret, frame = command_page.vid.get_frame()
+
+            if ret:
+                image = PIL.ImageTk.PhotoImage(PIL.Image.fromarray(frame))
+                command_page.panel.configure(image=image)
+                command_page.panel.image = image
+
+    def start_plot_thread(self):
+        self.plot_thread = threading.Thread(target=self._plot)
+        self.plot_thread.start()
+
+    def _plot(self):
+        while True:
+            time.sleep(1)
+            self.ax.plot(
+                self.server.current_x,
+                self.server.current_y,
+                color='blue',
+                linestyle='--',
+                marker='o'
+            )
+
+            self.ax.plot(
+                self.server.x_desired,
+                self.server.y_desired,
+                color='green',
+                linestyle='--',
+                marker='o'
+            )
+
+            self.graph_canvas.draw()
+
+    def create_graph_canvas(self):
+
+        self.figure = Figure(figsize=(5,5))
+        self.ax = self.figure.add_subplot(111)
+        self.ax.grid()
+        self.graph_canvas = FigureCanvasTkAgg(self.figure, self)
+        self.graph_canvas.draw()
+        self.graph_canvas.get_tk_widget().grid(row=0, column=3)
+
+    def create_listener_canvas(self):
+
+        listen_label = tk.Label(self, text='LISTENING')
+        listen_label.grid(row=0, column=0, stick=tk.N)
+        self.listener_canvas = tk.Canvas(self, width=25, height=25)
+        self.listener_canvas.grid(row=0, column=1, rowspan=1, columnspan=1, stick=tk.N)
+        self.oval_listening = self.listener_canvas.create_oval(5, 2, 20, 17, fill="red")
+        self.command_label = tk.Label(self, text='COMMAND: ')
+        self.command_label.grid(row=1, column=0, stick=tk.W+tk.N)
+
+        """
         textbox = tk.Text(self)#, width=100, height=100,)
         textbox.grid(row=1, column=0, rowspan=1, columnspan=1)
         textbox.insert(tk.END,'IF RED -> SPEAK KEYWORD.\nIF GREEN -> SPEAK COMMAND')
-
+        """
     def start_listening_check(self, controller):
         self.listen_check_thread = threading.Thread(target=self._listen_check, args=(controller,))
         self.listen_check_thread.start()
@@ -100,11 +211,12 @@ class command_page(tk.Frame):
     def _listen_check(self, controller):
         while True:
             if self.recorder.listening:
-                self.canvas.itemconfig(self.oval_listening, fill="green")
+                self.listener_canvas.itemconfig(self.oval_listening, fill="green")
                 if self.recorder.command!='':
                     self.send_command(controller)
+                    self.command_label.configure(text=f'COMMAND: {self.recorder.command}')
             else:
-                self.canvas.itemconfig(self.oval_listening, fill="red")
+                self.listener_canvas.itemconfig(self.oval_listening, fill="red")
                 self.recorder.command = ''
 
     def send_command(self, controller):
@@ -149,113 +261,7 @@ class command_page(tk.Frame):
             gui.server.msg_payload_send = [92, 1, 0, 0, 0, 0, 0, 0]
         else:
             print("YOU DID NOT ENTER A COMMAND!")
-        """
-        while True:
-            self.ar.start_recording()
-            time.sleep(2)
-            self.ar.stop_recording()
-            text = self.ar.recognize_recording()
-            if 'hey baby' in text:
-                print('Speak Command')
-                self.ar.start_recording()
-                self.ar.listening = True
-                time.sleep(5)
-                self.ar.stop_recording()
-                text = self.ar.recognize_recording()
-                print(text)
-        """
-"""
-class command_page(tk.Frame):
 
-    def __init__(self, parent, controller):
-
-        tk.Frame.__init__(self, parent)
-        #label = tk.Label(self, text="Command Page")
-        #label.grid(row=0, column=0, columnspan=4, sticky=tk.W, padx=15)
-
-
-
-        self.text = ''
-        self.recorder = ar.AudioRecorder()
-
-        self.record_btn = tk.Button(
-            self,
-            text="Record",
-            bg = "gray"
-        )
-
-        self.record_btn.bind("<Button-1>", self.recorder.start_recording)
-        self.record_btn.bind("<ButtonRelease-1>", self.recorder.stop_recording)
-        self.record_btn.grid(row=0, column=0)
-
-        self.playsound_btn = tk.Button(
-            self,
-            text="Play Recording",
-            command=lambda: self.recorder.play_recording(),
-            bg="gray"
-        )
-        self.playsound_btn.grid(row=0, column=1)
-
-        self.speechrecognition_btn = tk.Button(
-            self,
-            text="Audio-to-Text",
-            command=lambda: self.translate_command(),
-            bg="gray"
-        )
-        self.speechrecognition_btn.grid(row=0, column=2)
-
-        self.sendcommand_btn = tk.Button(
-            self,
-            text="Send Command",
-            command=lambda: self.send_command(controller),
-            bg="gray"
-        )
-        self.sendcommand_btn.grid(row=0, column=3)
-
-        textbox = tk.Text(self)
-        textbox.grid(row=1, column=0, rowspan=3, columnspan=100)
-        textbox.insert(tk.END,'AWWW SHIT! YOU WANNA USE THIS?!\n1)HOLD DOWN Record AND SAY THINGS\n2)PRESS Play Recording TO HEAR YOUR BEAUTIFUL VOICE\n3)PRESS Audio-to-Text TO TRANSLATE\n4)SEND THE COMMAND (ONLY WORKS FOR FORWARD/BACKWARD/LEFT/RIGHT)')
-
-    def translate_command(self):
-
-        audio_to_text = self.recorder.recognize_recording()
-        print(audio_to_text)
-
-        self.text = audio_to_text.split()[0]
-
-
-    def send_command(self, controller):
-        dist = 0.1
-        text = self.text
-        gui = controller.gui
-        if 'for' in text:
-            print(f"MOVE FORWARD {dist}m")
-            gui.server.x_desired = gui.server.current_x + 0.1
-        elif 'back' in text:
-            print(f"MOVE BACKWARD {dist}m")
-            gui.server.x_desired = gui.server.current_x - 0.1
-        elif 'left' in text:
-            print(f"MOVE LEFT {dist}m")
-            gui.server.y_desired = gui.server.current_y - 0.1
-        elif 'right' in text:
-            print(f"MOVE RIGHT {dist}m")
-            gui.server.y_desired = gui.server.current_y + 0.1
-        elif 'disarm' in text:
-            print("DISARMING")
-            gui.server.msg_payload_send = [400, 0, 0, 0, 0, 0, 0, 0]
-        elif 'arm' in text:
-            print('ARMING')
-            gui.server.msg_payload_send = [400, 1, 0, 0, 0, 0, 0, 0]
-        elif 'disable' in text:
-            print('DISABLING OFFBOARD')
-            gui.server.msg_payload_send = [92, 0, 0, 0, 0, 0, 0, 0]
-        elif 'enable' in text:
-            print('ENABLING OFFBOARD')
-            gui.server.msg_payload_send = [92, 1, 0, 0, 0, 0, 0, 0]
-        else:
-            print("NAHHHH\nSAY EITHER LEFT/RIGHT/BACK/FORWARD YOU SILLY GOOSE!")
-        #self.update_setpoint()
-"""
 def main(gui):
     root = tk.Tk()
     app = Window(root, gui)
@@ -263,5 +269,6 @@ def main(gui):
 
 if __name__=='__main__':
     root = tk.Tk()
-    app = Window(root)
+    gui = GUI()
+    app = Window(root, gui)
     root.mainloop()
