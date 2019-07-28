@@ -7,54 +7,35 @@ import numpy as np
 import cv2
 import math
 import time
-
+import PIL.Image, PIL.ImageTk
 WINDOW_WIDTH = 800
 WINDOW_HEIGHT = 800
 
 DUAL_MONITOR = False
 
-class MyVideoCapture:
-
-    def __init__(self, video_source=0):
-        self.vid = cv2.VideoCapture('udpsrc port=5000 caps = "application/x-rtp, media=(string)video, clock-rate=(int)90000, encoding-name=(string)H264, payload=(int)96" ! rtph264depay ! decodebin ! videoconvert ! appsink', cv2.CAP_GSTREAMER)
-        #self.vid = cv2.VideoCapture(video_source)
-        self.video_source = video_source
-        if not self.vid.isOpened():
-            raise ValueError("Unable to open video source", video_source)
-
-        # Get video source width and height
-        self.width = self.vid.get(cv2.CAP_PROP_FRAME_WIDTH)
-        self.height = self.vid.get(cv2.CAP_PROP_FRAME_HEIGHT)
-
-    # Release the video source when the object is destroyed
-    def __del__(self):
-        if self.vid.isOpened():
-            self.vid.release()
-            self.window.mainloop()
-
-    def get_frame(self):
-        if self.vid.isOpened():
-            ret, frame = self.vid.read()
-            if ret:
-                # Return a boolean success flag and the current frame converted to BGR
-                return (ret, cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
-            else:
-                return (ret, None)
-        else:
-            return (ret, None)
-
 class GUI:
-    def __init__(self, _server=None):
-        self.start = True
+    def __init__(self, _server=None, _video=None, _audio=None):
+
         self.server = _server
+        self.video = _video
+        self.audio = _audio
         self.setpoint = [0,0,0]
         self.text = []
+        self.close_threads = False
 
     def update_setpoint(self):
         self.server.x_desired = self.setpoint[0]
         self.server.y_desired = self.setpoint[1]
         self.server.z_desired = self.setpoint[2]
         self.server.yaw_desired = 0
+
+    def start(self):
+        root = tk.Tk()
+        app = Window(root, self)
+        root.mainloop()
+
+    def stop(self):
+        self.close_threads = True
 
 class Window(tk.Tk):
 
@@ -105,6 +86,7 @@ class Window(tk.Tk):
 
     def close_window(self, event = None):
 
+        self.gui.stop()
         exit()
 
     def cycle_frames(self, container):
@@ -119,60 +101,62 @@ class command_page(tk.Frame):
 
         tk.Frame.__init__(self, parent)
 
-        self.recorder = ar.AudioRecorder()
         self.create_listener_canvas()
-        self.recorder.keyword_listener(keyword='hey baby')
         self.start_listening_check(controller)
 
-        self.create_graph_canvas()
-        self.start_plot_thread()
-        self.start_video_thread()
+        #self.create_graph_canvas()
+        #self.start_plot_thread(controller)
+        #self.create_video_canvas()
+        #self.start_video_thread(controller)
 
-    def start_video_thread(self):
-        self.video_thread = threading.Thread(target=self._vide)
+    def create_video_canvas(self):
+
+        self.video_canvas = tk.Canvas(self)#, width=1000, height=1000)
+        self.video_canvas.grid(row=0, column=5, rowspan=100, columnspan=100)
+
+    def start_video_thread(self, controller):
+
+        self.video_thread = threading.Thread(target=self._video, args=(controller,))
         self.video_thread.start()
 
-    def _video(self):
-        self.vid = MyVideoCapture()
+    def _video(self, controller):
+
+        video = controller.gui.video
         self.panel = None
 
-
-        ret, frame = self.vid.get_frame()
+        ret, frame = video.get_frame()
 
         while not ret:
-            ret, frame = self.vid.get_frame()
+            ret, frame = video.get_frame()
+            print("FRAME NOT RECIEVD!")
 
-        image = PIL.ImageTk.PhotoImage(PIL.Image.fromarray(frame))
-        self.panel = tk.Label(self, image=image)
-        self.panel.image = image
-        self.panel.grid(row=0, column=5)#, rowspan=100, padx=15)
-
-        while True:
-            ret, frame = command_page.vid.get_frame()
-
+        while not controller.gui.close_threads:
+            ret, frame = video.get_frame()
             if ret:
-                image = PIL.ImageTk.PhotoImage(PIL.Image.fromarray(frame))
-                command_page.panel.configure(image=image)
-                command_page.panel.image = image
+                self.photo = PIL.ImageTk.PhotoImage(image = PIL.Image.fromarray(frame))
+                self.video_canvas.create_image(0, 0, image=self.photo)
 
-    def start_plot_thread(self):
-        self.plot_thread = threading.Thread(target=self._plot)
+        return
+
+    def start_plot_thread(self, controller):
+        self.plot_thread = threading.Thread(target=self._plot,args=(controller,))
         self.plot_thread.start()
 
-    def _plot(self):
+    def _plot(self, controller):
+
         while True:
             time.sleep(1)
             self.ax.plot(
-                self.server.current_x,
-                self.server.current_y,
+                controller.gui.server.current_x,
+                controller.gui.server.current_y,
                 color='blue',
                 linestyle='--',
                 marker='o'
             )
 
             self.ax.plot(
-                self.server.x_desired,
-                self.server.y_desired,
+                controller.gui.server.x_desired,
+                controller.gui.server.y_desired,
                 color='green',
                 linestyle='--',
                 marker='o'
@@ -199,30 +183,31 @@ class command_page(tk.Frame):
         self.command_label = tk.Label(self, text='COMMAND: ')
         self.command_label.grid(row=1, column=0, stick=tk.W+tk.N)
 
-        """
-        textbox = tk.Text(self)#, width=100, height=100,)
-        textbox.grid(row=1, column=0, rowspan=1, columnspan=1)
-        textbox.insert(tk.END,'IF RED -> SPEAK KEYWORD.\nIF GREEN -> SPEAK COMMAND')
-        """
     def start_listening_check(self, controller):
+
         self.listen_check_thread = threading.Thread(target=self._listen_check, args=(controller,))
         self.listen_check_thread.start()
 
     def _listen_check(self, controller):
-        while True:
-            if self.recorder.listening:
+
+        audio = controller.gui.audio
+        while not controller.gui.close_threads:
+            if audio.listening:
                 self.listener_canvas.itemconfig(self.oval_listening, fill="green")
-                if self.recorder.command!='':
+                if audio.command!='':
                     self.send_command(controller)
-                    self.command_label.configure(text=f'COMMAND: {self.recorder.command}')
+                    self.command_label.configure(text=f'COMMAND: {audio.command}')
             else:
                 self.listener_canvas.itemconfig(self.oval_listening, fill="red")
-                self.recorder.command = ''
+                audio.command = ''
 
     def send_command(self, controller):
         dist = 0.1
-        text = self.recorder.command
+
+
         gui = controller.gui
+        audio = gui.audio
+        text = audio.command
         if 'for' in text:
             print(f"MOVE FORWARD {dist}m")
             gui.server.x_desired = gui.server.current_x + 0.1
@@ -261,11 +246,6 @@ class command_page(tk.Frame):
             gui.server.msg_payload_send = [92, 1, 0, 0, 0, 0, 0, 0]
         else:
             print("YOU DID NOT ENTER A COMMAND!")
-
-def main(gui):
-    root = tk.Tk()
-    app = Window(root, gui)
-    root.mainloop()
 
 if __name__=='__main__':
     root = tk.Tk()

@@ -8,13 +8,14 @@ from enum import Enum
 import threading
 import numpy as np
 
+from main import SharedMAVLink
+
 class MAVServer:
     def __init__(self,ip_="localhost",port_=9999):
         self.ip = ip_
         self.port = port_
+
         self.socket_server = None
-        self.frame = 0
-        #self.video = Video_Capture.MyVideoCapture(0)
         self.server_started = False
         self.msg_payload_send = [0]*8
         self.current_x = 0
@@ -43,7 +44,6 @@ class MAVServer:
         logging.info("SERVER CREATED")
         self.server = server
 
-
         return
 
     def wait_for_heartbeat(self):
@@ -62,7 +62,7 @@ class MAVServer:
 
         self.wait_for_heartbeat()
         self.start_recv_thread()
-        self.send_thread()
+        self.start_send_thread()
 
     def start_recv_thread(self):
 
@@ -74,19 +74,29 @@ class MAVServer:
 
         return
 
+    def start_send_thread(self):
 
-    def close_server(self):
+        logging.info("SPAWNING SEND THREAD")
 
-        self.close_threads = True
+        self.send_flag = True
+        self.send_thread = threading.Thread(target=self.send_msg)
+        self.send_thread.start()
 
+        return
 
     def close_recv_thread(self):
 
-        self.recv_thread.join()
+        return
+        #self.recv_thread.join()
 
-    def send_thread(self):
-        print("STARTING SEND THREAD")
-        while True:
+    def close_send_thread(self):
+
+        return
+        #self.send_thread.join()
+
+    def send_msg(self):
+        logging.info("STARTING SEND THREAD")
+        while not self.close_threads:
 
             # SETPOINTS
             self.server.mav.set_position_target_local_ned_send(
@@ -149,14 +159,13 @@ class MAVServer:
                 self.msg_payload_send[0] = 0
             time.sleep(1/self.msg_per_second)
 
+        self.close_send_thread()
+
+        return
 
     def recv_msg(self):
 
         while not self.close_threads:
-
-            # VIDEO FEED
-            #ret, frame = self.video.get_frame()
-            #self.frame = frame
 
             try:
                 msg = self.server.recv_match()
@@ -173,10 +182,21 @@ class MAVServer:
             except KeyboardInterrupt:
                 self.close_recv_thread()
                 return
+            (time.sleep(0.1))
 
         self.close_recv_thread()
 
         return
+
+    def stop(self):
+
+        logging.info("CLOSING SERVER")
+        self.close_threads = True
+
+    def start(self):
+
+        self.conn_server()
+        self.run_server()
 
 def main(server):
 
@@ -184,5 +204,5 @@ def main(server):
         server.conn_server()
         server.run_server()
     except KeyboardInterrupt:
-        logging.info("CLOSING SERVER")
-        server.close_server()
+
+        server.stop()

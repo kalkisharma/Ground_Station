@@ -3,8 +3,9 @@ import logging
 import math
 
 class Jarvis:
-    def __init__(self, server_, image_):
+    def __init__(self, server_, audio_, image_=None):
         self.server = server_
+        self.audio = audio_
         self.image = image_
 
         self.behavior = ""
@@ -145,6 +146,14 @@ class Jarvis:
         while self.dist_to_setpoint(self.setpoint) > 0.1:
             self.update_setpoint()
 
+    def start(self):
+
+        self.start_cmd_thread()
+
+    def stop(self):
+
+        self.close_thread = True
+
 def main(jarvis):
     jarvis.enable_offboard()
     while jarvis.server.msg_payload_send[0] != 0:
@@ -157,7 +166,7 @@ def main(jarvis):
 
         jarvis.takeoff()
         jarvis.land()
-        
+
         """
         jarvis.takeoff()
         jarvis.center_over_home()

@@ -5,6 +5,7 @@ from playsound import playsound
 
 import threading
 import time
+import logging
 
 class AudioRecorder():
 
@@ -14,15 +15,16 @@ class AudioRecorder():
     CHUNK = 1024
     WAVE_OUTPUT_FILENAME = "file.wav"
 
-    def __init__(self):
+    def __init__(self, _keyword=''):
         self.record = True
         self.audio = pyaudio.PyAudio()
         self.frames = []
         self.stream = []
-        self.keyword = ''
+        self.keyword = _keyword
         self.command = ''
         self.record_thread = None
         self.listening = False
+        self.close_thread = False
 
     def reset(self):
         self.record = True
@@ -90,15 +92,23 @@ class AudioRecorder():
         except:
             return('')
 
-    def keyword_listener(self, keyword='hello'):
-        self.keyword = keyword
+    def keyword_listener(self):
+        
         self.listen_thread = threading.Thread(target=self._listen)
         self.listen_thread.start()
 
+    def stop(self):
+
+        self.close_thread = True
+
+    def start(self):
+
+        self.keyword_listener()
+
     def _listen(self, loop_time=3, listen_time=5):
         #ar = AudioRecorder()
-        print("RUNNING LISTENING THREAD")
-        while True:
+        logging.info("RUNNING LISTENING THREAD")
+        while not self.close_thread:
             self.start_recording()
             time.sleep(loop_time)
             self.stop_recording()
@@ -115,3 +125,4 @@ class AudioRecorder():
                 print(f'COMMAND: {text}')
                 self.command = text
                 self.listening = False
+        return

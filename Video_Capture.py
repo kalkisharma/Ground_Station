@@ -5,6 +5,8 @@ import time
 class MyVideoCapture:
 
     def __init__(self, video_source=0):
+        self.close_thread = False
+        #self.vid = cv2.VideoCapture('udpsrc port=5000 caps = "application/x-rtp, media=(string)video, clock-rate=(int)90000, encoding-name=(string)H264, payload=(int)96" ! rtph264depay ! decodebin ! videoconvert ! appsink', cv2.CAP_GSTREAMER)
         self.vid = cv2.VideoCapture(video_source)
         self.video_source = video_source
         if not self.vid.isOpened():
@@ -30,6 +32,30 @@ class MyVideoCapture:
                 return (ret, None)
         else:
             return (ret, None)
+
+    def start(self):
+        #return
+        self.start_video_thread()
+
+    def start_video_thread(self):
+
+        self.video_thread = threading.Thread(target=self.start_video)
+        self.video_thread.start()
+
+    def start_video(self):
+
+        while not self.close_thread:
+            ret, frame = self.get_frame()
+            cv2.imshow("output", frame) #np.hstack([frame, output])) #np.hstack([frame, output]))
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                break
+
+        return
+
+    def stop(self):
+
+        self.close_thread = True
+
 
 def capture_video(video):
     while True:
