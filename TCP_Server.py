@@ -7,31 +7,25 @@ import logging
 from enum import Enum
 import threading
 import numpy as np
+import Shared
 
-from main import SharedMAVLink
 
 class MAVServer:
-    def __init__(self,ip_="localhost",port_=9999):
-        self.ip = ip_
-        self.port = port_
+    def __init__(self):
+
+        Shared.data.mav_lock.acquire()
+        self.msg_per_second = Shared.data.msg_per_second
+        self.ip = Shared.data.ip
+        self.port = Shared.data.port
+        Shared.data.mav_lock.release()
 
         self.socket_server = None
         self.server_started = False
-        self.msg_payload_send = [0]*8
-        self.current_x = 0
-        self.current_y = 0
-        self.current_z = 0
-        self.x_desired = 0
-        self.y_desired = 0
-        self.z_desired = 0
-        self.yaw_desired = 0
-        self.msg_per_second = 4
 
         self.send_flag = False
         self.recv_flag = False
         self.video_flag = False
         self.close_threads = False
-        self.lock = threading.Lock()
 
     def get_frame(self):
         return self.frame
@@ -96,7 +90,19 @@ class MAVServer:
 
     def send_msg(self):
         logging.info("STARTING SEND THREAD")
+
         while not self.close_threads:
+
+            # Get latest update of data to be sent to the quad
+            Shared.data.mav_lock.acquire()
+            desired_pos = Shared.data.desired_pos
+            desired_yaw = Shared.data.desired_yaw
+            msg_payload_send = Shared.data.msg_payload_send
+
+            # Vidullan: Kalki, do we need this anymore?
+            #Shared.data.msg_payload_send[0] = 0
+
+            Shared.data.mav_lock.release()
 
             # SETPOINTS
             self.server.mav.set_position_target_local_ned_send(
@@ -104,42 +110,39 @@ class MAVServer:
                 1, 1,
                 1, #local
                 0b000111111000, #take pos and yaw
-                self.x_desired, self.y_desired, self.z_desired, # x, y, z positions (not used)
+                desired_pos[0], desired_pos[1], desired_pos[2], # x, y, z positions (not used)
                 0, 0, 0, # x, y, z velocity in m/s
                 0, 0, 0, # x, y, z acceleration (not used)
-                self.yaw_desired, 0.
+                desired_yaw, 0.
             )
 
             # LONG COMMANDS
-            msg_payload_send = self.msg_payload_send
 
             if msg_payload_send[0] != 0:
-                self.lock.acquire()
-                self.mav_cmd_id = int(msg_payload_send[0])
-                self.param1 = float(msg_payload_send[1])
-                self.param2 = float(msg_payload_send[2])
-                self.param3 = float(msg_payload_send[3])
-                self.param4 = float(msg_payload_send[4])
-                self.param5 = float(msg_payload_send[5])
-                self.param6 = float(msg_payload_send[6])
-                self.param7 = float(msg_payload_send[7])
-                self.lock.release()
+                mav_cmd_id = int(msg_payload_send[0])
+                param1 = float(msg_payload_send[1])
+                param2 = float(msg_payload_send[2])
+                param3 = float(msg_payload_send[3])
+                param4 = float(msg_payload_send[4])
+                param5 = float(msg_payload_send[5])
+                param6 = float(msg_payload_send[6])
+                param7 = float(msg_payload_send[7])
 
                 if msg_payload_send[0] > 0:
                     #send the command
-                    print("SENDING COMMAND")
+                    logging.info("SENDING COMMAND")
                     self.server.mav.command_long_send(
                         1, # autopilot system id
                         1, # autopilot component id
-                        self.mav_cmd_id, # command id
+                        mav_cmd_id, # command id
                         1, # confirmation
-                        self.param1,
-                        self.param2,
-                        self.param3,
-                        self.param4,
-                        self.param5,
-                        self.param6,
-                        self.param7 # unused parameters for this command
+                        param1,
+                        param2,
+                        param3,
+                        param4,
+                        param5,
+                        param6,
+                        param7 # unused parameters for this command
                     )
                 elif msg_payload_send[0] == -1:
                     self.server.mav.scaled_pressure_send(
@@ -156,7 +159,7 @@ class MAVServer:
                         1,
                         1
                     )
-                self.msg_payload_send[0] = 0
+                Shared.data.msg_payload_send[0] = 0
             time.sleep(1/self.msg_per_second)
 
         self.close_send_thread()
@@ -176,9 +179,14 @@ class MAVServer:
 
                 if msg.get_type() == 'LOCAL_POSITION_NED':
                     #logging.info(f"X: {msg.x} \t Y: {msg.y} Z: {msg.z}")
-                    self.current_x = msg.x
-                    self.current_y = msg.y
-                    self.current_z = msg.z
+                    x = msg.x
+                    y = msg.y
+                    z = msg.z
+
+                    Shared.data.mav_lock.acquire()
+                    Shared.data.current_pos = [x,y,z]
+                    Shared.data.mav_lock.release()
+
             except KeyboardInterrupt:
                 self.close_recv_thread()
                 return

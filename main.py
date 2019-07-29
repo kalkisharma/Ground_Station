@@ -8,26 +8,24 @@ import cv2
 import time
 import Video_Capture
 import audio_recorder
-
-class SharedMAVLink:
-
-    LOCK = threading.Lock()
-
-class SharedVideo:
-
-    LOCK = threading.Lock()
+import Shared
 
 def main():
 
+    # Initialize shared constants
+    Shared.data.ip = "localhost" # Server IP
+    Shared.data.port = 9999 # Server Port
+    Shared.data.video_source = 'udpsrc port=5000 caps = "application/x-rtp, media=(string)video, clock-rate=(int)90000, encoding-name=(string)H264, payload=(int)96" ! rtph264depay ! decodebin ! videoconvert ! appsink', cv2.CAP_GSTREAMER
+    Shared.data.video_source = 0
+
     # Initialize class objects
-    server = TCP_Server.MAVServer("localhost", 9999)
-    video_source = 'udpsrc port=5000 caps = "application/x-rtp, media=(string)video, clock-rate=(int)90000, encoding-name=(string)H264, payload=(int)96" ! rtph264depay ! decodebin ! videoconvert ! appsink', cv2.CAP_GSTREAMER
-    video_source = 0
-    video = Video_Capture.MyVideoCapture(video_source)
-    audio = audio_recorder.AudioRecorder('machine')
+    server = TCP_Server.MAVServer()
+
+    video = Video_Capture.MyVideoCapture(Shared.data.video_source)
+    audio = audio_recorder.AudioRecorder('machine.pmdl', 0.5)
     #image = Image_Recognition.MAVImageRecognition(server)
-    #jarvis = Jarvis.Jarvis(server, audio, image)
-    gui = GUI.GUI(server, video, audio)
+    jarvis = Jarvis.Jarvis()
+    gui = GUI.GUI()
 
     # Start
     logging.info("RUNNING SERVER")
@@ -39,6 +37,9 @@ def main():
     logging.info("RUNNING AUDIO")
     audio.start()
 
+    logging.info("RUNNING JARVIS")
+    jarvis.start()
+
     while not server.server_started:
         time.sleep(0.1)
 
@@ -48,6 +49,8 @@ def main():
     # Stop
     server.stop()
     video.stop()
+    audio.stop()
+    jarvis.stop()
 
 if __name__ == "__main__":
     # logging.basicConfig(filename="log.log", filemode="w", format='%(levelname)s:%(message)s', level=logging.INFO)

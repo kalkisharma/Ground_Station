@@ -7,6 +7,11 @@ import threading
 import time
 import logging
 
+import snowboydecoder
+import os
+
+import Shared
+
 class AudioRecorder():
 
     FORMAT = pyaudio.paInt16
@@ -15,16 +20,15 @@ class AudioRecorder():
     CHUNK = 1024
     WAVE_OUTPUT_FILENAME = "file.wav"
 
-    def __init__(self, _keyword=''):
-        self.record = True
-        self.audio = pyaudio.PyAudio()
-        self.frames = []
-        self.stream = []
-        self.keyword = _keyword
-        self.command = ''
-        self.record_thread = None
-        self.listening = False
+    def __init__(self, modelFile='', sens = 0.5):
+
+        self.detector = snowboydecoder.HotwordDetector(modelFile, sensitivity= sens)
+
+
         self.close_thread = False
+
+        self.listen_thread = threading.Thread(target = self.start_listening)
+
 
     def reset(self):
         self.record = True
@@ -34,49 +38,6 @@ class AudioRecorder():
         if self.record_thread!=None:
             self.record_thread.join()
 
-    def start_recording(self, _=None):
-        self.reset()
-        # Start recording thread
-        self.record_thread = threading.Thread(target=self._record)
-        self.record_thread.start()
-
-    def _record(self):
-        # start Recording
-        self.stream = self.audio.open(
-                        format=self.FORMAT,
-                        channels=self.CHANNELS,
-                        rate=self.RATE,
-                        input=True,
-                        frames_per_buffer=self.CHUNK
-                        )
-        #print("RECORDING...")
-
-        while self.record:
-            data = self.stream.read(self.CHUNK)
-            self.frames.append(data)
-
-        #print("FINISHED RECORDING")
-
-    def stop_recording(self, _=None):
-        self.record = False
-
-        # Wait to ensure recording completed
-        time.sleep(0.1)
-        self.record_thread.join()
-
-        # stop Recording
-        self.stream.stop_stream()
-        self.stream.close()
-        self.audio.terminate()
-
-    #def save_recording(self):
-        # Save recording
-        waveFile = wave.open(self.WAVE_OUTPUT_FILENAME, 'wb')
-        waveFile.setnchannels(self.CHANNELS)
-        waveFile.setsampwidth(self.audio.get_sample_size(self.FORMAT))
-        waveFile.setframerate(self.RATE)
-        waveFile.writeframes(b''.join(self.frames))
-        waveFile.close()
 
     def play_recording(self):
         playsound(self.WAVE_OUTPUT_FILENAME)
@@ -92,37 +53,62 @@ class AudioRecorder():
         except:
             return('')
 
-    def keyword_listener(self):
-        
-        self.listen_thread = threading.Thread(target=self._listen)
-        self.listen_thread.start()
 
-    def stop(self):
+    def stop_recording(self):
+        if self.close_thread:
+            print('Stopping audio recorder.', end='', flush=True)
 
-        self.close_thread = True
+        return self.close_thread
+
+    def detectedCallback(self):
+        #print('Recognized keyword. Listening...', end='', flush=True)
+        logging.info('Recognized keyword. Listening...')
+        Shared.data.audio_lock.acquire()
+        Shared.data.listening = True
+        Shared.data.audio_command = ('', time.time())
+        Shared.data.audio_lock.release()
+
+
 
     def start(self):
+        self.close_thread = False
+        self.listen_thread.start()
 
-        self.keyword_listener()
+    def start_listening(self):
 
-    def _listen(self, loop_time=3, listen_time=5):
-        #ar = AudioRecorder()
-        logging.info("RUNNING LISTENING THREAD")
-        while not self.close_thread:
-            self.start_recording()
-            time.sleep(loop_time)
-            self.stop_recording()
-            text = self.recognize_recording()
-            if text!='':
-                print(text)
-            if self.keyword in text:
-                print('SPEAK COMMAND')
-                self.start_recording()
-                self.listening = True
-                time.sleep(listen_time)
-                self.stop_recording()
-                text = self.recognize_recording()
-                print(f'COMMAND: {text}')
-                self.command = text
-                self.listening = False
-        return
+        self.detector.start(detected_callback=self.detectedCallback,
+            interrupt_check=self.stop_recording,
+            audio_recorder_callback=self.audioRecorderCallback,
+            recording_timeout= 20, # 1 unit of timeout is ~ 220 milliseconds
+            sleep_time=0.03)
+
+    def stop(self):
+        self.close_thread = True
+
+    def audioRecorderCallback(self, fname):
+        print("Converting audio to text")
+        
+        r = sr.Recognizer()
+        with sr.AudioFile(fname) as source:
+            audio = r.record(source)  # read the entire audio file
+        # recognize speech using Google Speech Recognition
+
+        try:
+            val = r.recognize_google(audio, show_all=True)
+            os.remove(fname)
+            if(len(val)):
+                Shared.data.audio_lock.acquire()
+                Shared.data.audio_command = (val['alternative'][0]['transcript'],time.time())
+                Shared.data.audio_lock.release()
+
+        except sr.UnknownValueError:
+            print("Google Speech Recognition could not understand audio")
+            os.remove(fname)
+
+        except sr.RequestError as e:
+            print("Could not request results from Google Speech Recognition service; {0}".format(e))
+            os.remove(fname)
+
+        Shared.data.audio_lock.acquire()
+        Shared.data.listening = False
+        Shared.data.audio_lock.release()
