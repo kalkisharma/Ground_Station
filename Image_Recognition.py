@@ -206,6 +206,10 @@ class MAVImageRecognition:
 
         return frame
 
+    def start():
+
+        pass
+
 def main(image):
     time.sleep(1)
     while True:
