@@ -10,8 +10,6 @@ import Video_Capture
 import audio_recorder
 import Shared
 
-# ollies-branch
-
 def main():
 
     # Initialize shared constants
