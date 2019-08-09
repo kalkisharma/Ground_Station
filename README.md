@@ -89,5 +89,5 @@ git push
 Since we have successfully merged our new branch with master, we no longer need it, and will delete.
 ```
 git branch -d name_of_new_branch
-
+```
 
