@@ -29,4 +29,4 @@ class data:
     # video frames obtained from the quad
     video_source = 0
     video_lock = threading.Lock()
-    frame = np.zeros([720,1280,3]);
+    frame = np.zeros([480,640,3]);

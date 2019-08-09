@@ -1,11 +1,13 @@
 import cv2
 import threading
 import time
+import Shared
 
 class MyVideoCapture:
 
-    def __init__(self, video_source=0):
+    def __init__(self, video_source=0, show_video=True):
         self.close_thread = False
+        self.show_video = show_video
         #self.vid = cv2.VideoCapture('udpsrc port=5000 caps = "application/x-rtp, media=(string)video, clock-rate=(int)90000, encoding-name=(string)H264, payload=(int)96" ! rtph264depay ! decodebin ! videoconvert ! appsink', cv2.CAP_GSTREAMER)
         self.vid = cv2.VideoCapture(video_source)
         self.video_source = video_source
@@ -46,9 +48,11 @@ class MyVideoCapture:
 
         while not self.close_thread:
             ret, frame = self.get_frame()
-            cv2.imshow("output", frame) #np.hstack([frame, output])) #np.hstack([frame, output]))
-            if cv2.waitKey(1) & 0xFF == ord('q'):
-                break
+            Shared.data.frame = frame
+            if self.show_video:
+                cv2.imshow("output", Shared.data.frame) #np.hstack([frame, output])) #np.hstack([frame, output]))
+                if cv2.waitKey(1) & 0xFF == ord('q'):
+                    break
 
         return
 

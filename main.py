@@ -1,7 +1,7 @@
 import threading
 import logging
 import TCP_Server
-#import Image_Recognition
+import Image_Recognition
 import Jarvis
 import GUI
 import cv2
@@ -19,41 +19,41 @@ def main():
     Shared.data.video_source = 0
 
     # Initialize class objects
-    server = TCP_Server.MAVServer()
+    #server = TCP_Server.MAVServer()
 
-    video = Video_Capture.MyVideoCapture(Shared.data.video_source)
-    audio = audio_recorder.AudioRecorder('machine.pmdl', 0.5)
+    video = Video_Capture.MyVideoCapture(Shared.data.video_source, show_video=True)
+    #audio = audio_recorder.AudioRecorder('machine.pmdl', 0.5)
     image = Image_Recognition.MAVImageRecognition()
-    jarvis = Jarvis.Jarvis()
-    gui = GUI.GUI()
+    #jarvis = Jarvis.Jarvis()
+    #gui = GUI.GUI()
 
     # Start
-    logging.info("RUNNING SERVER")
-    server.start()
+    #logging.info("RUNNING SERVER")
+    #server.start()
 
     logging.info("RUNNING VIDEO")
     video.start()
 
-    logging.info("RUNNING AUDIO")
-    audio.start()
+    #logging.info("RUNNING AUDIO")
+    #audio.start()
 
     logging.info("RUNNING IMAGE RECOGNITION")
     image.start()
 
-    logging.info("RUNNING JARVIS")
-    jarvis.start()
+    #logging.info("RUNNING JARVIS")
+    #jarvis.start()
 
-    while not server.server_started:
-        time.sleep(0.1)
+    #while not server.server_started:
+    #    time.sleep(0.1)
 
-    logging.info("RUNNING GUI")
-    gui.start()
+    #logging.info("RUNNING GUI")
+    #gui.start()
 
     # Stop
-    server.stop()
+    #server.stop()
     video.stop()
-    audio.stop()
-    jarvis.stop()
+    #audio.stop()
+    #jarvis.stop()
 
 if __name__ == "__main__":
     # logging.basicConfig(filename="log.log", filemode="w", format='%(levelname)s:%(message)s', level=logging.INFO)

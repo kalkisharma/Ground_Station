@@ -6,10 +6,12 @@ import time
 import imutils
 import logging
 import numpy as np
+import Shared
 
 class MAVImageRecognition:
-    def __init__(self, server_):
-        self.frame = None
+    def __init__(self):
+        """
+        self.frame = data.frame
         self.server = server_
         self.tag_name = ""
         self.target_name = ""
@@ -39,7 +41,7 @@ class MAVImageRecognition:
 
         self.x = 100
         self.y = 100
-
+        """
     def compute_pixel_dist(self):
         width = 2*self.altitude*math.tan(self.theta/2)
         self.pix_to_meter = width/self.width
@@ -207,9 +209,14 @@ class MAVImageRecognition:
 
         return frame
 
-    def start():
+    def start(self):
+        
+        # Video data stored in -> Shared.data.frame
+        # Keep this function as short as possible and call other functions from this
 
-        pass
+        # I have added this loop to keep the code running, but this is a temporary addition
+        while True:
+            pass
 
 def main(image):
     time.sleep(1)
