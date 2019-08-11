@@ -75,21 +75,32 @@ Push your new local branch to the remote repository
 git push origin name_of_new_branch
 ```
 
-During the time it took to make these changes to your code, the master branch may have been edited by another contributer. Navigate to the remote repository in your browser. 
+During the time it took to make these changes to your code, the master branch may have been edited by another contributer. Navigate to the remote repository in your browser and click on the tab "branches". This will show all the active branches which have been pushed to the remote repo (and the "Default branch" -> the master branch).
 
-Now merge your branch with the master branch
+Create a new pull request by clicking "New pull request" and then "Create pull request". It is here that changes to your_edited_file.py can be seen (with deletions highlighted red and additions highlighted green).
+
+If there are no conflicts between your branch and the remote master, you are able to merge by clicking "Merge pull request". 
+
+Alternatively, this process could have been completed from command line.
 ```
-git merge name_of_new_branch --no-ff
+git fetch origin
+git checkout -b name_of_new_branch origin/name_of_new_branch
+git merge master
 ```
+and then
+```
+git checkout master
+git merge --no-ff name_of_new_branch
+git push origin master
+``` 
 (--no-ff indicates that we want to retain all of the commit messages prior to this merge).
 
-Now push your changes from your local master branch to the remote master branch (the master branch on GitHub).
-```
-git push
-```
+If there are merge conflicts, the relevant lines of your_edited_file.py will be displayed, and left to you to reconcile the conflicts. Once reconciled, the process proceeds as described above.
 
 ### Deleting your branch
 Since we have successfully merged your new branch with master, we no longer need it, and will delete.
 ```
 git branch -d name_of_new_branch
 ```
+
+Alternatively, the branch can be deleted from github in your browser (one method is to click on the "branches" tab and clicking the trash can next to the branch in question".
