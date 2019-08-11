@@ -70,15 +70,12 @@ Remember to write a informative description of the changes you have made, when p
 ### Pushing changes to the master branch
 If you are happy with your changes (and they are thoroughly tested and BUG FREE!!), you are ready to push these changes to the master branch.
 
-Switch to the master branch
+Push your new local branch to the remote repository
 ```
-git checkout master
+git push origin name_of_new_branch
 ```
 
-During the time it took to make these changes to your code, the master branch may have been edited by another contributer. Pull the latest stable version from master
-```
-git pull
-```
+During the time it took to make these changes to your code, the master branch may have been edited by another contributer. Navigate to the remote repository in your browser. 
 
 Now merge your branch with the master branch
 ```
@@ -96,11 +93,3 @@ Since we have successfully merged your new branch with master, we no longer need
 ```
 git branch -d name_of_new_branch
 ```
-# This is a test!
-
-
-# Leo
-## OLLIE WAS HERE
-# Kalki Sharma
-#rachel axten
-
