@@ -30,3 +30,7 @@ class data:
     video_source = 0
     video_lock = threading.Lock()
     frame = np.zeros([480,640,3]);
+    ret = None
+    video_width = 640
+    video_height = 480
+    pixel_pos = [0,0]

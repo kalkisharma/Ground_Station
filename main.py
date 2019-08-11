@@ -21,11 +21,11 @@ def main():
     # Initialize class objects
     #server = TCP_Server.MAVServer()
 
-    video = Video_Capture.MyVideoCapture(Shared.data.video_source, show_video=True)
+    video = Video_Capture.MyVideoCapture(Shared.data.video_source, show_video=False)
     #audio = audio_recorder.AudioRecorder('machine.pmdl', 0.5)
     image = Image_Recognition.MAVImageRecognition()
     #jarvis = Jarvis.Jarvis()
-    #gui = GUI.GUI()
+    gui = GUI.GUI()
 
     # Start
     #logging.info("RUNNING SERVER")
@@ -46,8 +46,8 @@ def main():
     #while not server.server_started:
     #    time.sleep(0.1)
 
-    #logging.info("RUNNING GUI")
-    #gui.start()
+    logging.info("RUNNING GUI")
+    gui.start()
 
     # Stop
     #server.stop()

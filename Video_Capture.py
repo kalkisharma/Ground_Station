@@ -17,6 +17,8 @@ class MyVideoCapture:
         # Get video source width and height
         self.width = self.vid.get(cv2.CAP_PROP_FRAME_WIDTH)
         self.height = self.vid.get(cv2.CAP_PROP_FRAME_HEIGHT)
+        Shared.data.video_width = self.width
+        Shared.data.video_height = self.height
 
     # Release the video source when the object is destroyed
     def __del__(self):
@@ -49,6 +51,7 @@ class MyVideoCapture:
         while not self.close_thread:
             ret, frame = self.get_frame()
             Shared.data.frame = frame
+            Shared.data.ret = ret
             if self.show_video:
                 cv2.imshow("output", Shared.data.frame) #np.hstack([frame, output])) #np.hstack([frame, output]))
                 if cv2.waitKey(1) & 0xFF == ord('q'):

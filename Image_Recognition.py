@@ -210,13 +210,12 @@ class MAVImageRecognition:
         return frame
 
     def start(self):
-        
-        # Video data stored in -> Shared.data.frame
-        # Keep this function as short as possible and call other functions from this
 
-        # I have added this loop to keep the code running, but this is a temporary addition
-        while True:
-            pass
+        pass
+        # Video data stored in -> Shared.data.frame
+        # Pixel column -> Shared.data.pixel_pos[0]
+        # Pixel row -> Shared.data.pixel_pos[1] 
+        # Keep this function as short as possible and call other functions from here
 
 def main(image):
     time.sleep(1)

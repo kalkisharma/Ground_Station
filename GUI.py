@@ -98,26 +98,29 @@ class command_page(tk.Frame):
 
         self.controller = controller
 
-        self.create_listener_canvas()
+        #self.create_listener_canvas()
 
         #self.create_graph_canvas()
-        self.create_video_canvas()
-
+        self.create_video_canvas(_row=0, _column=0)
+        self.create_video_textbox(_row=1, _column=0)
         self._video()
         #self._plot()
-        self._listen_check()
+        #self._listen_check()
 
 
         #self.test()
 
-    def create_video_canvas(self):
+    def create_video_canvas(self, _row=0, _column=0, _rowspan=1, _columnspan=1):
 
-        self.video_canvas = tk.Canvas(self)#, width=1000, height=1000)
-        self.video_canvas.grid(row=0, column=5, rowspan=100, columnspan=100)
+        width = Shared.data.video_width
+        height = Shared.data.video_height
+        self.video_canvas = tk.Canvas(self, bg='blue', width = width, height = height)#, width=1000, height=1000)
+        self.video_canvas.grid(row=_row, column=_column, rowspan=_rowspan, columnspan=_columnspan)
 
-    def test(self):
-        print("Test")
-        self.controller.after(100,self.test)
+    def create_video_textbox(self, _row=0, _column=0, _rowspan=1, _columnspan=1):
+
+        self.pixel_label = tk.Label(self, text=f'x pixel: {Shared.data.pixel_pos[0]}\ny pixel: {Shared.data.pixel_pos[1]}')
+        self.pixel_label.grid(row=_row, column=_column, rowspan=_rowspan, columnspan=_columnspan)
 
     def _video(self):
 
@@ -125,12 +128,17 @@ class command_page(tk.Frame):
 
         Shared.data.video_lock.acquire()
         frame = np.copy(Shared.data.frame)
+        ret = Shared.data.ret
         Shared.data.video_lock.release()
 
-        photo = PIL.ImageTk.PhotoImage(image = PIL.Image.fromarray(frame, 'RGB'))
-        self.video_canvas.create_image(0, 0, image=photo)
+        if ret:
+            self.photo = PIL.ImageTk.PhotoImage(image = PIL.Image.fromarray(frame))
+            self.video_canvas.create_image(0, 0, image=self.photo, anchor=tk.NW)
 
-        self.controller.after(100,self._video)
+        # Update pixel location
+        self.pixel_label.config(text=f'x pixel: {Shared.data.pixel_pos[0]}\ny pixel: {Shared.data.pixel_pos[1]}')
+
+        self.controller.after(100, self._video)
 
     def _plot(self):
 
