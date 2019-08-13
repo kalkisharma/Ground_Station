@@ -52,6 +52,7 @@ def main():
     # Stop
     #server.stop()
     video.stop()
+    image.stop()
     #audio.stop()
     #jarvis.stop()
 

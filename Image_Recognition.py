@@ -6,10 +6,13 @@ import time
 import imutils
 import logging
 import numpy as np
-from shared import data
+import Shared
+import threading
 
 class MAVImageRecognition:
     def __init__(self):
+
+        self.close_threads = False
         """
         self.frame = data.frame
         self.server = server_
@@ -216,63 +219,88 @@ class MAVImageRecognition:
         return frame
 
     def detect_package(self):
-        current_pos = data.current_pos
-        frame = data.frame
-        gray_img = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 
-        # HSV range for red box
-        lower_red = np.array([114, 59, 83])
-        upper_red = np.array([180, 255, 255])
+        while not self.close_threads:
 
-        # only find pixels in image which fall into specified colour range
-        maskhsv = cv2.inRange(hsv, lower_blue, upper_blue)
-        # Gaussian to remove noisy region
-        mask = cv2.medianBlur(maskhsv, 5)
-        # 8-way pixel connectivity - centre pixel connected to its 8 neighbours
-        connectivity = 8
-        # Finds all connected pixels within binary maskhsv image
-        output = cv2.connectedComponentsWithStats(mask, connectivity, cv2.CV_8U)
-        # number of blobs in image seen with required colour
-        num_labels = output[0]
-        # Labels of blobs
-        labels = output[1]
-        # The location and size of bounding box of blobs
-        stats = output[2]
-        # The centroid of each bounding box
-        centroids = output[3]
-        max_area = 0
-        max_centroid = None
+            current_pos = Shared.data.current_pos
+            frame = np.copy(Shared.data.frame)
 
-        for i in range(1, num_labels):
-            x_left = stats[i, cv2.CC_STAT_LEFT]
-            y_top = stats[i, cv2.CC_STAT_TOP]
-            width = stats[i, cv2.CC_STAT_WIDTH]
-            height = stats[i, cv2.CC_STAT_HEIGHT]
-            area = stats[i, cv2.CC_STAT_AREA]
-            centroid = centroids[i]
+            gray_img = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+            hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 
-            alt = current_pos[2]
-            box_area = get_size(0.15, 0.155, alt)
-            if area > 0.5 * box_area:
-                # Draw rectangle around blob
-                cv2.rectangle(cimg, (stats[i, cv2.CC_STAT_LEFT], stats[i, cv2.CC_STAT_TOP]),
-                              (stats[i, cv2.CC_STAT_LEFT] + stats[i, cv2.CC_STAT_WIDTH],
-                               stats[i, cv2.CC_STAT_TOP] + stats[i, cv2.CC_STAT_HEIGHT]), random_color(random), 2)
-                if area > max_area:
-                    max_area = area
-                    max_centroid = centroid
-        return max_centroid
+            # HSV range for red box
+            lower_red = np.array([114, 59, 83])
+            upper_red = np.array([180, 255, 255])
+
+            # only find pixels in image which fall into specified colour range
+            maskhsv = cv2.inRange(hsv, lower_blue, upper_blue)
+            # Gaussian to remove noisy region
+            mask = cv2.medianBlur(maskhsv, 5)
+            # 8-way pixel connectivity - centre pixel connected to its 8 neighbours
+            connectivity = 8
+            # Finds all connected pixels within binary maskhsv image
+            output = cv2.connectedComponentsWithStats(mask, connectivity, cv2.CV_8U)
+            # number of blobs in image seen with required colour
+            num_labels = output[0]
+            # Labels of blobs
+            labels = output[1]
+            # The location and size of bounding box of blobs
+            stats = output[2]
+            # The centroid of each bounding box
+            centroids = output[3]
+            max_area = 0
+            max_centroid = [-1,-1]
+            
+            for i in range(1, num_labels):
+                x_left = stats[i, cv2.CC_STAT_LEFT]
+                y_top = stats[i, cv2.CC_STAT_TOP]
+                width = stats[i, cv2.CC_STAT_WIDTH]
+                height = stats[i, cv2.CC_STAT_HEIGHT]
+                area = stats[i, cv2.CC_STAT_AREA]
+                centroid = centroids[i]
+
+                alt = current_pos[2]
+                box_area = get_size(0.15, 0.155, alt)
+                if area > 0.5 * box_area:
+                    # Draw rectangle around blob
+                    cv2.rectangle(cimg, (stats[i, cv2.CC_STAT_LEFT], stats[i, cv2.CC_STAT_TOP]),
+                                  (stats[i, cv2.CC_STAT_LEFT] + stats[i, cv2.CC_STAT_WIDTH],
+                                   stats[i, cv2.CC_STAT_TOP] + stats[i, cv2.CC_STAT_HEIGHT]), random_color(random), 2)
+                    if area > max_area:
+                        max_area = area
+                        max_centroid = centroid
+            Shared.data.pixel_pos[0] = max_centroid[0]
+            Shared.data.pixel_pos[1] = max_centroid[1]
+            #return max_centroid
+
+        return
+
+    def start_package_thread(self):
+
+        self.package_thread = threading.Thread(target=self.detect_package)
+        self.package_thread.start()
 
     def start(self):
+
+        self.start_package_thread()
+
+        return
+
+    def stop(self):
+
+        self.close_threads = True
+
+        return
+
         #centroid = self.detect_package()
         #if centroid is not None:
         #    print('Package found at {}'.format(centroid))
-        pass
+
         # Video data stored in -> Shared.data.frame
         # Pixel column -> Shared.data.pixel_pos[0]
-        # Pixel row -> Shared.data.pixel_pos[1] 
+        # Pixel row -> Shared.data.pixel_pos[1]
         # Keep this function as short as possible and call other functions from here
+
 
 def main(image):
     time.sleep(1)
