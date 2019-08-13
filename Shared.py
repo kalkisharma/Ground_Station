@@ -33,4 +33,6 @@ class data:
     ret = None
     video_width = 640
     video_height = 480
+    FOVU = 0.840248046
+    FOVV = 0.648415104
     pixel_pos = [0,0]
