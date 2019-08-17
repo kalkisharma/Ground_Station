@@ -25,7 +25,8 @@ def main():
     #audio = audio_recorder.AudioRecorder('machine.pmdl', 0.5)
     image = Image_Recognition.MAVImageRecognition()
     #jarvis = Jarvis.Jarvis()
-    gui = GUI.GUI()
+    #gui = GUI.GUI()
+    #gui.start()
 
     # Start
     #logging.info("RUNNING SERVER")
