@@ -122,6 +122,10 @@ class command_page(tk.Frame):
         self.pixel_label = tk.Label(self, text=f'x pixel: {Shared.data.pixel_pos[0]}\ny pixel: {Shared.data.pixel_pos[1]}')
         self.pixel_label.grid(row=_row, column=_column, rowspan=_rowspan, columnspan=_columnspan)
 
+        _row+=1
+        self.curr_pos_label = tk.Label(self, text=f'Current Position\nx: {round(Shared.data.current_pos[0],2)}\ny: {round(Shared.data.current_pos[1],2)}\nz: {round(Shared.data.current_pos[2],2)}')
+        self.curr_pos_label.grid(row=_row, column=_column, rowspan=_rowspan, columnspan=_columnspan)
+
     def _video(self):
 
         self.panel = None
@@ -137,6 +141,9 @@ class command_page(tk.Frame):
 
         # Update pixel location
         self.pixel_label.config(text=f'x pixel: {Shared.data.pixel_pos[0]}\ny pixel: {Shared.data.pixel_pos[1]}')
+
+        # Update current position
+        self.curr_pos_label.config(text=f'Current Position\nx: {round(Shared.data.current_pos[0],2)}\ny: {round(Shared.data.current_pos[1],2)}\nz: {round(Shared.data.current_pos[2],2)}')
 
         self.controller.after(100, self._video)
 
