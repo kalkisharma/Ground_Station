@@ -12,7 +12,7 @@ class data:
     # mav messages and pose values from and to quad
     mav_lock = threading.Lock()
 
-    current_pos = [0,0,0]
+    current_pos = [0,0,-1.5]
     desired_pos = [0,0,0]
     current_yaw = 0
     desired_yaw = 0
@@ -29,7 +29,7 @@ class data:
     # video frames obtained from the quad
     video_source = 0
     video_lock = threading.Lock()
-    frame = np.zeros([480,640,3]);
+    frame = np.zeros([480,640,3], dtype=np.float32)
     ret = None
     video_width = 640
     video_height = 480
