@@ -22,9 +22,9 @@ def main():
     server = TCP_Server.MAVServer()
     video = Video_Capture.MyVideoCapture(Shared.data.video_source, show_video=False)
     #audio = audio_recorder.AudioRecorder('machine.pmdl', 0.5)
-    image = Image_Recognition.MAVImageRecognition()
+    #image = Image_Recognition.MAVImageRecognition()
     #jarvis = Jarvis.Jarvis()
-    #gui = GUI.GUI()
+    gui = GUI.GUI()
     #gui.start()
 
     # Start
@@ -37,8 +37,8 @@ def main():
     #logging.info("RUNNING AUDIO")
     #audio.start()
 
-    logging.info("RUNNING IMAGE RECOGNITION")
-    image.start()
+    #logging.info("RUNNING IMAGE RECOGNITION")
+    #image.start()
 
     #logging.info("RUNNING JARVIS")
     #jarvis.start()
@@ -52,7 +52,7 @@ def main():
     # Stop
     server.stop()
     video.stop()
-    image.stop()
+    #image.stop()
     #audio.stop()
     #jarvis.stop()
 
