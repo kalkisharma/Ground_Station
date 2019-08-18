@@ -9,13 +9,14 @@ import numpy as np
 import Shared
 import threading
 from realsense_read import RealSenseRead as rsRead
+import Video_Capture
 
 class MAVImageRecognition:
     def __init__(self):
 
         self.close_threads = False
-        self.test_ImgRec: bool = False
-        self.rs = rsRead()
+        self.test_ImgRec = True
+
         self.outImg = np.zeros([480,640,3], dtype=np.float32)
 
     def compute_pixel_dist(self):
@@ -109,21 +110,19 @@ class MAVImageRecognition:
         return
 
     def process_image(self):
-        if self.test_ImgRec:    # Run GS code with RealSense without quad in the loop
-            self.rs.start()
-            if not self.rs.rsConnect:   # If RealSense was not able to connect, stop image processing thread
-                self.stop()
+
         while not self.close_threads:
-            if self.test_ImgRec:
-                self.rs.get_pose()
 
             self.detect_package()
-            cv2.imshow("outImg", self.outImg)
+
+        return
 
     def start_process_thread(self):
 
-        self.process_thread = threading.Thread(target=self.process_image())
+        self.process_thread = threading.Thread(target=self.process_image)
         self.process_thread.start()
+
+        return
 
     def start(self):
 
@@ -134,12 +133,31 @@ class MAVImageRecognition:
     def stop(self):
 
         self.close_threads = True
-        if self.test_ImgRec and self.rs.rsConnect:
-            self.rs.stop()
 
         return
 
-def main(image):
+if __name__=='__main__':
 
     image = MAVImageRecognition()
+
+    # Thread to display image
+    video = Video_Capture.MyVideoCapture(0, show_video=True)
+    video.start()
+
+    # Loop to recognize images
     image.start()
+    
+    # Start realsense
+    rs = rsRead.start()
+
+    # Loop while realsense connected
+    while rs.rsConnect:
+        pos = rs.get_pose()
+        #Shared.data.current_pos[0] =
+        #Shared.data.current_pos[0] =
+        #Shared.data.current_pos[0] =
+        #Shared.data.current_yaw =
+
+    rs.stop()
+    image.stop()
+    video.stop()
