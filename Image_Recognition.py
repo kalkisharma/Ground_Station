@@ -103,7 +103,6 @@ class MAVImageRecognition:
                 # Only send pixel centroid if area of blob is the right size
                 max_centroid = centroid
 
-        self.outImg = np.copy(maskBGR)
         Shared.data.pixel_pos[0] = max_centroid[0]
         Shared.data.pixel_pos[1] = max_centroid[1]
 
@@ -148,7 +147,8 @@ if __name__=='__main__':
     image.start()
     
     # Start realsense
-    rs = rsRead.start()
+    rs = rsRead()
+    rs.start()
 
     # Loop while realsense connected
     while rs.rsConnect:
