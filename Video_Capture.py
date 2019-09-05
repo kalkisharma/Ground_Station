@@ -72,8 +72,9 @@ def capture_video(video):
             break
 
 if __name__=='__main__':
-    video = MyVideoCapture()
-
+    video = MyVideoCapture(4, True)
+    video.start()
+    """
     video_thread = threading.Thread(target=capture_video, args=(video,))
     video_thread.start()
     time_start = time.time()
@@ -81,3 +82,6 @@ if __name__=='__main__':
     while time.time() < time_start + timeout:
         pass
     video_thread.join()
+    """
+    while True:
+        pass
