@@ -149,7 +149,7 @@ class MAVImageRecognition:
                         text = pytesseract.image_to_string(PILimg,
                                                            config='-c tessedit_char_whitelist=0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ')
 
-                        if len(text) = 3:
+                        if len(text) == 3:
                             output['data'].append([text, np.array([x, y, rectH/frame.shape[0], rectW/frame.shape[1]])])
         return output
 
