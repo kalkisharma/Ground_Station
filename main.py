@@ -19,17 +19,16 @@ def main():
     Shared.data.video_source = 0
 
     # Initialize class objects
-    server = TCP_Server.MAVServer()
+    #server = TCP_Server.MAVServer()
     video = Video_Capture.MyVideoCapture(Shared.data.video_source, show_video=False)
     #audio = audio_recorder.AudioRecorder('machine.pmdl', 0.5)
-    #image = Image_Recognition.MAVImageRecognition()
+    image = Image_Recognition.MAVImageRecognition()
     #jarvis = Jarvis.Jarvis()
     gui = GUI.GUI()
-    #gui.start()
 
     # Start
-    logging.info("RUNNING SERVER")
-    server.start()
+    #logging.info("RUNNING SERVER")
+    #server.start()
 
     logging.info("RUNNING VIDEO")
     video.start()
@@ -37,22 +36,22 @@ def main():
     #logging.info("RUNNING AUDIO")
     #audio.start()
 
-    #logging.info("RUNNING IMAGE RECOGNITION")
-    #image.start()
+    logging.info("RUNNING IMAGE RECOGNITION")
+    image.start()
 
     #logging.info("RUNNING JARVIS")
     #jarvis.start()
 
-    while not server.server_started:
-        time.sleep(0.1)
+    #while not server.server_started:
+    #    time.sleep(0.1)
 
     logging.info("RUNNING GUI")
     gui.start()
 
     # Stop
-    server.stop()
+    #server.stop()
     video.stop()
-    #image.stop()
+    image.stop()
     #audio.stop()
     #jarvis.stop()
 

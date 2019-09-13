@@ -12,7 +12,7 @@ import PIL.Image, PIL.ImageTk
 import Shared
 import signal
 
-WINDOW_WIDTH = 800
+WINDOW_WIDTH = 1280
 WINDOW_HEIGHT = 800
 
 DUAL_MONITOR = False
@@ -103,6 +103,7 @@ class command_page(tk.Frame):
         #self.create_graph_canvas()
         self.create_video_canvas(_row=0, _column=0)
         self.create_video_textbox(_row=1, _column=0)
+        self.create_image_buttons(_row=1, _column=1)
         self._video()
         #self._plot()
         #self._listen_check()
@@ -110,12 +111,57 @@ class command_page(tk.Frame):
 
         #self.test()
 
+    def create_image_buttons(self, _row=1, _column=1, _rowspan=1, _columnspan=1):
+
+        self.qr_detect_button = tk.Button(self, text='QR', command=self.detect_qr)
+        self.qr_detect_button.grid(row=_row, column=_column, rowspan=_rowspan, columnspan=_columnspan)
+
+        _row+=1
+        self.an_detect_button = tk.Button(self, text='AN', command=self.detect_an)
+        self.an_detect_button.grid(row=_row, column=_column, rowspan=_rowspan, columnspan=_columnspan)
+
+        _row+=2
+        self.package_detect_button = tk.Button(self, text='Package', command=self.detect_package)
+        self.package_detect_button.grid(row=_row, column=_column, rowspan=_rowspan, columnspan=_columnspan)
+
+    def detect_package(self):
+
+        if Shared.data.detect_package_flag:
+            self.package_detect_button.config(relief=tk.RAISED)
+            Shared.data.detect_package_flag = False
+        else:
+            self.package_detect_button.config(relief=tk.SUNKEN)
+            Shared.data.detect_package_flag = True
+
+    def detect_an(self):
+
+        if Shared.data.detect_an_flag:
+            self.an_detect_button.config(relief=tk.RAISED)
+            Shared.data.detect_an_flag = False
+        else:
+            self.an_detect_button.config(relief=tk.SUNKEN)
+            Shared.data.detect_an_flag = True
+
+    def detect_qr(self):
+
+        if Shared.data.detect_qr_flag:
+            self.qr_detect_button.config(relief=tk.RAISED)
+            Shared.data.detect_qr_flag = False
+        else:
+            self.qr_detect_button.config(relief=tk.SUNKEN)
+            Shared.data.detect_qr_flag = True
+
     def create_video_canvas(self, _row=0, _column=0, _rowspan=1, _columnspan=1):
 
         width = Shared.data.video_width
         height = Shared.data.video_height
+
         self.video_canvas = tk.Canvas(self, bg='blue', width = width, height = height)#, width=1000, height=1000)
         self.video_canvas.grid(row=_row, column=_column, rowspan=_rowspan, columnspan=_columnspan)
+
+        _column+=1
+        self.video_canvas_ir = tk.Canvas(self, bg='green', width = width, height = height)#, width=1000, height=1000)
+        self.video_canvas_ir.grid(row=_row, column=_column, rowspan=_rowspan, columnspan=_columnspan)
 
     def create_video_textbox(self, _row=0, _column=0, _rowspan=1, _columnspan=1):
 
@@ -133,11 +179,15 @@ class command_page(tk.Frame):
         Shared.data.video_lock.acquire()
         frame = np.copy(Shared.data.frame)
         ret = Shared.data.ret
+        frame_ir = np.copy(Shared.data.frame_image_recognition)
         Shared.data.video_lock.release()
 
         if ret:
             self.photo = PIL.ImageTk.PhotoImage(image = PIL.Image.fromarray(frame))
             self.video_canvas.create_image(0, 0, image=self.photo, anchor=tk.NW)
+
+            self.photo_ir = PIL.ImageTk.PhotoImage(image = PIL.Image.fromarray(frame_ir))
+            self.video_canvas_ir.create_image(0, 0, image=self.photo_ir, anchor=tk.NW)
 
         # Update pixel location
         self.pixel_label.config(text=f'x pixel: {Shared.data.pixel_pos[0]}\ny pixel: {Shared.data.pixel_pos[1]}')
