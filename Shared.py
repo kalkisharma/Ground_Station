@@ -18,7 +18,7 @@ class data:
     desired_yaw = 0
 
     msg_payload_send = [0]*8
-    msg_per_second = 4
+    msg_per_second = 1
 
     # tcp ip values
     ip = 'localhost'
@@ -37,9 +37,19 @@ class data:
     FOVU = 0.840248046
     FOVV = 0.648415104
     pixel_pos = [0,0]
-    barcode_list = []
+    image_data = {
+                    'data' : [], # List of values obtained from detection (e.g. qr code values)
+                    'time' : 0,
+                    'type' : 'QR/AN/Package',
+                    'pixel' : [] # List of pixel width and height relative to frame size
+                }
 
     # image recognition flags
     detect_qr_flag = False
     detect_an_flag = False
     detect_package_flag = False
+    pickup_flag = False
+
+    # recognition values
+    barcode_list = ['0000']
+    an_list = ['1A']

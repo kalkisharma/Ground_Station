@@ -9,8 +9,6 @@ import numpy as np
 import Shared
 import threading
 from realsense_read import RealSenseRead as rsRead
-from PIL import Image
-import pytesseract
 import Video_Capture
 
 from image_recognition.package import detect_package
@@ -40,8 +38,8 @@ class MAVImageRecognition:
                 detect_package()
             elif Shared.data.detect_an_flag:
                 detect_OCR()
-            else:
-                Shared.data.frame_image_recognition = Shared.data.frame
+            #else:
+                #Shared.data.frame_image_recognition = Shared.data.frame
 
         return
 

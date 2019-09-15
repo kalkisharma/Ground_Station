@@ -1,6 +1,8 @@
 import cv2
 import numpy as np
 import time
+from PIL import Image
+import pytesseract
 
 import Shared
 
@@ -29,7 +31,8 @@ def detect_OCR():
 
     # Find contours in the image
     (cnts, hierarchy) = cv2.findContours(edges.copy(), cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-
+    data = []
+    pixel_data = []
     # We are looking for a rectangular label, hence we only look at contours with four corners
     for i in range(len(cnts)):
         cnt = cnts[i]
@@ -107,6 +110,7 @@ def detect_OCR():
                     0.5) < 0.25 * dilated.shape[0] \
                             and 0.8 > h / w > 0.3:
                         isText = True
+                        #print("HERE")
                         break
 
                 if isText:
@@ -120,8 +124,23 @@ def detect_OCR():
                     PILimg = Image.fromarray(drc)
                     text = pytesseract.image_to_string(PILimg,
                                                        config='-c tessedit_char_whitelist=0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ')
-
+                    #print(len(text))
                     if len(text) == 3:
+                        pixel_data = (x, y, rectH/frame.shape[0], rectW/frame.shape[1])
+                        h = int(rectH)
+                        w = int(rectW)
+                        x = int(x)
+                        y = int(y)
+                        #print(x,y,w,h)
+                        data = text
+                        cv2.rectangle(frame, (x - w//2, y - h//2), (x + w//2, y + h//2), (0, 0, 255), 2)
+                        #cv2.circle(frame, (x,y), 10, (0,0,255))
                         output['data'].append([text, np.array([x, y, rectH/frame.shape[0], rectW/frame.shape[1]])])
+                        Shared.data.frame_image_recognition = frame
     Shared.data.frame_image_recognition = frame
-    return output
+    Shared.data.image_data = {
+        'data' : data, # List of values obtained from detection (e.g. qr code values)
+        'time' : time.time(),
+        'type' : 'AN',
+        'pixel' :  pixel_data# List of pixel width and height relative to frame size
+    }

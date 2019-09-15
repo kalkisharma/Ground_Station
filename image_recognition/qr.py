@@ -86,14 +86,15 @@ def detect_qr():
 
         # find the barcodes in the image and decode each of the barcodes
         barcodes = pyzbar.decode(image)
-
+        pixel_data = []
+        barcodeData = []
         # loop over the detected barcodes
         for barcode in barcodes:
             # extract the bounding box location of the barcode and draw the
             # bounding box surrounding the barcode on the image
             (x, y, w, h) = barcode.rect
             cv2.rectangle(image, (x, y), (x + w, y + h), (0, 0, 255), 2)
-
+            pixel_data.append((x, y, w, h))
             # the barcode data is a bytes object so if we want to draw it on
             # our output image we need to convert it to a string first
             barcodeData = barcode.data.decode("utf-8")
@@ -120,3 +121,9 @@ def detect_qr():
         frame = np.zeros((480,640,3), np.uint8)
 
     Shared.data.frame_image_recognition = frame
+    Shared.data.image_data = {
+        'data' : barcodeData, # List of values obtained from detection (e.g. qr code values)
+        'time' : time.time(),
+        'type' : 'QR',
+        'pixel' :  pixel_data# List of pixel width and height relative to frame size
+    }

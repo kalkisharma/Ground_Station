@@ -104,12 +104,29 @@ class command_page(tk.Frame):
         self.create_video_canvas(_row=0, _column=0)
         self.create_video_textbox(_row=1, _column=0)
         self.create_image_buttons(_row=1, _column=1)
+        self.create_package_buttons(_row=5, _column=1)
         self._video()
         #self._plot()
         #self._listen_check()
 
 
         #self.test()
+
+    def create_package_buttons(self, _row=1, _column=1, _rowspan=1, _columnspan=1):
+
+        self.package_button = tk.Button(self, text='Pickup', command=self.toggle_pickup)
+        self.package_button.grid(row=_row, column=_column, rowspan=_rowspan, columnspan=_columnspan)
+
+    def toggle_pickup(self):
+
+        if Shared.data.pickup_flag:
+            self.package_button.config(relief=tk.RAISED)
+            Shared.data.msg_payload_send[0] = -1
+            Shared.data.pickup_flag = False
+        else:
+            self.package_button.config(relief=tk.SUNKEN)
+            Shared.data.msg_payload_send[0] = -2
+            Shared.data.pickup_flag = True
 
     def create_image_buttons(self, _row=1, _column=1, _rowspan=1, _columnspan=1):
 
