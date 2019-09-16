@@ -4,6 +4,8 @@ import time
 
 import Shared
 
+# MUST USE TESSERACT 4.1.0 (or later) FOR BEST RESULTS (WHITELIST ENABLED)
+
 def detect_OCR():
     frame = np.copy(Shared.data.frame)
 
@@ -12,8 +14,13 @@ def detect_OCR():
         1, (0, 255, 0), 2)
 
     output = {'data': [], 'time':time.time(),'type':"AN",'imgSize':[frame.shape[0],frame.shape[1]]}
-    tag_width = 130
-    tag_height = 65
+    shelf_tag_width = 130
+    shelf_tag_height = 65
+    shelf_tag_digits = 3
+    aisle_tag_width = 130
+    aisle_tag_height = 130
+    aisle_tag_digits = 2
+    letter_asp = 2.9/2.3
 
     # Preprocess image
     Gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
@@ -77,14 +84,14 @@ def detect_OCR():
 
                 # De-rotate/warp to straighten sign
                 pts1 = np.float32([tl, bl, br, tr])
-                pts2 = np.float32([[0, 0], [0, tag_height], [tag_width, tag_height], [tag_width, 0]])
+                pts2 = np.float32([[0, 0], [0, shelf_tag_height], [shelf_tag_width, shelf_tag_height], [shelf_tag_width, 0]])
                 warp, mask = cv2.findHomography(pts1, pts2)
                 straight = cv2.warpPerspective(Gray.copy(), warp, (130, 65))
 
                 # Convert the image to binary and remove boarders
                 straight = cv2.threshold(straight, 0, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)[1]
-                straight = straight[np.int0(tag_height * 0.12):np.int0(tag_height * 0.88),
-                           np.int0(tag_width * 0.12):np.int0(tag_width * 0.88)]
+                straight = straight[np.int0(shelf_tag_height * 0.12):np.int0(shelf_tag_height * 0.88),
+                           np.int0(shelf_tag_width * 0.12):np.int0(shelf_tag_width * 0.88)]
 
                 # Is box likely to have text in it? (image_to_string is expensive, and we should avoid using it where possible)
                 kernel = np.array([[0, 0, 0, 0, 0],
@@ -105,7 +112,7 @@ def detect_OCR():
                             dilated.shape[0] * dilated.shape[1]) \
                             and ((Cx - 0.5 * dilated.shape[1]) ** 2 + (Cy - 0.5 * dilated.shape[0]) ** 2) ** (
                     0.5) < 0.25 * dilated.shape[0] \
-                            and 0.8 > h / w > 0.3:
+                            and 1.5*letter_asp/shelf_tag_digits > h / w > 0.5*letter_asp/shelf_tag_digits:
                         isText = True
                         break
 
@@ -121,7 +128,71 @@ def detect_OCR():
                     text = pytesseract.image_to_string(PILimg,
                                                        config='-c tessedit_char_whitelist=0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ')
 
-                    if len(text) == 3:
-                        output['data'].append([text, np.array([x, y, rectH/frame.shape[0], rectW/frame.shape[1]])])
+                    if len(text) == shelf_tag_digits:
+                        output['data'].append(['shelf',text, np.array([x, y, rectH/frame.shape[0], rectW/frame.shape[1]])])
+            elif 1.2 > aspect_ratio > 0.8:
+                M = cv2.moments(approx)
+                cY = int(M["m01"] / M["m00"])
+                for i in approx:
+                    if i[1] < cY:
+                        top.append(i)
+                    else:
+                        bot.append(i)
+                if len(top) == 2 and len(bot) == 2:
+                    tl = top[0] if top[0][0] < top[1][0] else top[1]
+                    tr = top[1] if top[0][0] < top[1][0] else top[0]
+                    bl = bot[0] if bot[0][0] < bot[1][0] else bot[1]
+                    br = bot[1] if bot[0][0] < bot[1][0] else bot[0]
+                else:
+                    continue
+
+                # De-rotate/warp to straighten sign
+                pts1 = np.float32([tl, bl, br, tr])
+                pts2 = np.float32([[0, 0], [0, aisle_tag_height], [aisle_tag_width, aisle_tag_height], [aisle_tag_width, 0]])
+                warp, mask = cv2.findHomography(pts1, pts2)
+                straight = cv2.warpPerspective(Gray.copy(), warp, (130, 130))
+
+                # Convert the image to binary and remove boarders
+                straight = cv2.threshold(straight, 0, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)[1]
+                straight = straight[np.int0(aisle_tag_height * 0.12):np.int0(aisle_tag_height * 0.88),
+                           np.int0(aisle_tag_width * 0.12):np.int0(aisle_tag_width * 0.88)]
+
+                # Is box likely to have text in it? (image_to_string is expensive, and we should avoid using it where possible)
+                kernel = np.array([[0, 0, 0, 0, 0],
+                                   [0, 0, 0, 0, 0],
+                                   [1, 1, 1, 1, 1],
+                                   [0, 0, 0, 0, 0],
+                                   [0, 0, 0, 0, 0]],
+                                  dtype=np.uint8)
+                dilated = cv2.morphologyEx(straight, cv2.MORPH_ERODE, kernel, iterations=3)
+                dilated = cv2.bitwise_not(dilated)
+                (conts, _) = cv2.findContours(dilated, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+                isText = False
+                for cont in conts:
+                    minrect = cv2.minAreaRect(cont)
+                    (Cx, Cy), (w, h), angle = minrect
+                    textarea = w * h
+                    if 0.3 * (dilated.shape[0] * dilated.shape[1]) > textarea > 0.01 * (
+                            dilated.shape[0] * dilated.shape[1]) \
+                            and ((Cx - 0.5 * dilated.shape[1]) ** 2 + (Cy - 0.5 * dilated.shape[0]) ** 2) ** (
+                            0.5) < 0.25 * dilated.shape[0] \
+                            and 1.5*letter_asp/aisle_tag_digits > h / w > 0.5*letter_asp/aisle_tag_digits:
+                        isText = True
+                        break
+
+                if isText:
+                    # Sharpen the image
+                    blur = cv2.GaussianBlur(straight, (3, 3), 3)
+                    straight = cv2.addWeighted(straight, 1.7, blur, -0.7, 0)
+                    drc = cv2.copyMakeBorder(straight, top=10, bottom=10, left=10, right=10,
+                                             borderType=cv2.BORDER_CONSTANT,
+                                             value=(255, 255, 255))
+                    # Extract text from image
+                    PILimg = Image.fromarray(drc)
+                    text = pytesseract.image_to_string(PILimg,
+                                                       config='-c tessedit_char_whitelist=0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ')
+
+                    if len(text) == shelf_tag_digits:
+                        output['data'].append(['aisle',text, np.array([x, y, rectH/frame.shape[0], rectW/frame.shape[1]])])
     Shared.data.frame_image_recognition = frame
     return output
