@@ -105,12 +105,24 @@ class command_page(tk.Frame):
         self.create_video_textbox(_row=1, _column=0)
         self.create_image_buttons(_row=1, _column=1)
         self.create_package_buttons(_row=5, _column=1)
+        self.create_movement_buttons(_row=0, _column=2)
         self._video()
         #self._plot()
         #self._listen_check()
 
 
         #self.test()
+
+    def create_movement_buttons(self, _row=1, _column=1, _rowspan=1, _columnspan=1):
+
+        self.takeoff_button = tk.Button(self, text='Takeoff', command=self.toggle_takeoff)
+        self.takeoff_button.grid(row=_row, column=_column, rowspan=_rowspan, columnspan=_columnspan)
+
+    def toggle_takeoff(self):
+
+        Shared.data.desired_pos = Shared.data.current_pos
+        Shared.data.desired_attitude = Shared.data.current_attitude
+        Shared.data.desired_pos[2] = Shared.data.takeoff_altitude
 
     def create_package_buttons(self, _row=1, _column=1, _rowspan=1, _columnspan=1):
 
@@ -182,12 +194,12 @@ class command_page(tk.Frame):
 
     def create_video_textbox(self, _row=0, _column=0, _rowspan=1, _columnspan=1):
 
-        self.pixel_label = tk.Label(self, text=f'x pixel: {Shared.data.pixel_pos[0]}\ny pixel: {Shared.data.pixel_pos[1]}')
-        self.pixel_label.grid(row=_row, column=_column, rowspan=_rowspan, columnspan=_columnspan)
-
-        _row+=1
         self.curr_pos_label = tk.Label(self, text=f'Current Position\nx: {round(Shared.data.current_pos[0],2)}\ny: {round(Shared.data.current_pos[1],2)}\nz: {round(Shared.data.current_pos[2],2)}')
         self.curr_pos_label.grid(row=_row, column=_column, rowspan=_rowspan, columnspan=_columnspan)
+
+        _row+=1
+        self.desired_pos_label = tk.Label(self, text=f'Desired Position\nx: {round(Shared.data.desired_pos[0],2)}\ny: {round(Shared.data.desired_pos[1],2)}\nz: {round(Shared.data.desired_pos[2],2)}')
+        self.desired_pos_label.grid(row=_row, column=_column, rowspan=_rowspan, columnspan=_columnspan)
 
     def _video(self):
 
@@ -207,7 +219,7 @@ class command_page(tk.Frame):
             self.video_canvas_ir.create_image(0, 0, image=self.photo_ir, anchor=tk.NW)
 
         # Update pixel location
-        self.pixel_label.config(text=f'x pixel: {Shared.data.pixel_pos[0]}\ny pixel: {Shared.data.pixel_pos[1]}')
+        self.desired_pos_label.config(text=f'Desired Position\nx: {round(Shared.data.desired_pos[0],2)}\ny: {round(Shared.data.desired_pos[1],2)}\nz: {round(Shared.data.desired_pos[2],2)}')
 
         # Update current position
         self.curr_pos_label.config(text=f'Current Position\nx: {round(Shared.data.current_pos[0],2)}\ny: {round(Shared.data.current_pos[1],2)}\nz: {round(Shared.data.current_pos[2],2)}')

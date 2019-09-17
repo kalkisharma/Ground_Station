@@ -33,7 +33,7 @@ class MAVServer:
     def conn_server(self):
 
         logging.info("SERVER IP -> {0}, SERVER PORT -> {1}".format(self.ip, self.port))
-        server = mavutil.mavlink_connection('udpin:{0}:{1}'.format(self.ip, self.port), planner_format=False,
+        server = mavutil.mavlink_connection('tcpin:{0}:{1}'.format(self.ip, self.port), planner_format=False,
                                             notimestamps=True, robust_parsing=True)
         logging.info("SERVER CREATED")
         self.server = server
@@ -96,7 +96,7 @@ class MAVServer:
             # Get latest update of data to be sent to the quad
             Shared.data.mav_lock.acquire()
             desired_pos = Shared.data.desired_pos
-            desired_yaw = Shared.data.desired_yaw
+            desired_yaw = Shared.data.desired_attitude[2]
             msg_payload_send = Shared.data.msg_payload_send
 
             # Vidullan: Kalki, do we need this anymore?
@@ -187,10 +187,28 @@ class MAVServer:
                     Shared.data.current_pos = [x,y,z]
                     Shared.data.mav_lock.release()
 
+                    if not Shared.data.initial_pos_flag:
+                        Shared.data.initial_pos = Shared.data.current_pos
+                        Shared.data.initial_pos_flag = True
+
+                if msg.get_type() == 'ATTITUDE':
+                    #logging.info(f"X: {msg.x} \t Y: {msg.y} Z: {msg.z}")
+                    roll = msg.roll
+                    pitch = msg.pitch
+                    yaw = msg.yaw
+
+                    Shared.data.mav_lock.acquire()
+                    Shared.data.current_attitude = [roll, pitch, yaw]
+                    Shared.data.mav_lock.release()
+
+                    if not Shared.data.initial_pos_flag:
+                        Shared.data.initial_attitude = Shared.data.current_attitude
+                        Shared.data.initial_attitude_flag = True
+
             except KeyboardInterrupt:
                 self.close_recv_thread()
                 return
-            (time.sleep(0.1))
+            #(time.sleep(0.1))
 
         self.close_recv_thread()
 

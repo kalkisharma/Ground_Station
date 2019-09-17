@@ -12,13 +12,17 @@ class data:
     # mav messages and pose values from and to quad
     mav_lock = threading.Lock()
 
+    initial_pos = [0, 0, 0]
     current_pos = [0, 0, 0]
     desired_pos = [0, 0, 0]
-    current_yaw = 0
-    desired_yaw = 0
+    initial_attitude = [0, 0, 0]
+    current_attitude = [0, 0, 0]
+    desired_attitude = [0, 0, 0]
 
     msg_payload_send = [0]*8
-    msg_per_second = 1
+    msg_per_second = 5
+
+    takeoff_altitude = 2
 
     # tcp ip values
     ip = 'localhost'
@@ -53,3 +57,7 @@ class data:
     # recognition values
     barcode_list = ['0000']
     an_list = ['1A']
+
+    # position flags
+    initial_pos_flag = False
+    initial_attitude_flag = False

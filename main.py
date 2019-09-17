@@ -16,7 +16,7 @@ def main():
     Shared.data.ip = "localhost" # Server IP
     Shared.data.port = 9999 # Server Port
     Shared.data.video_source = 'udpsrc port=5000 caps = "application/x-rtp, media=(string)video, clock-rate=(int)90000, encoding-name=(string)H264, payload=(int)96" ! rtph264depay ! decodebin ! videoconvert ! appsink', cv2.CAP_GSTREAMER
-    Shared.data.video_source = 4
+    Shared.data.video_source = 0
 
     # Initialize class objects
     server = TCP_Server.MAVServer()
