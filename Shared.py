@@ -21,7 +21,7 @@ class data:
     msg_per_second = 4
 
     # tcp ip values
-    ip = 'localhost'
+    ip = '104.39.142.243'
     port = 9999
     #ip = '192.168.10.13'
     #port = 9998

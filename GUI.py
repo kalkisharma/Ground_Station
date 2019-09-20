@@ -1,5 +1,5 @@
 import tkinter as tk
-import audio_recorder as ar
+#import audio_recorder as ar
 import threading
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure

@@ -13,6 +13,7 @@ import Shared
 def main():
 
     # Initialize shared constants
+<<<<<<< Updated upstream
     Shared.data.ip = "localhost" # Server IP
     Shared.data.port = 9999 # Server Port
     Shared.data.video_source = 'udpsrc port=5000 caps = "application/x-rtp, ' \
@@ -20,9 +21,17 @@ def main():
                                'payload=(int)96" ! rtph264depay ! decodebin ! videoconvert ! appsink', cv2.CAP_GSTREAMER
     Shared.data.video_source = 0
 
+=======
+    Shared.data.ip = "192.168.1.2" # Server IP
+    Shared.data.port = 5000 # Server Port
+    Shared.data.video_source = ['udpsrc port=9999 caps = "application/x-rtp, '
+                                'media=(string)video, clock-rate=(int)90000, encoding-name=(string)H264, '
+                                'payload=(int)96" ! rtph264depay ! avdec_h264 ! queue ! '
+                                'videoconvert ! appsink',cv2.CAP_GSTREAMER]
+>>>>>>> Stashed changes
     # Initialize class objects
-    #server = TCP_Server.MAVServer()
-    video = Video_Capture.MyVideoCapture(Shared.data.video_source, show_video=False)
+    server = TCP_Server.MAVServer()
+    video = Video_Capture.MyVideoCapture()
     #audio = audio_recorder.AudioRecorder('machine.pmdl', 0.5)
     image = Image_Recognition.MAVImageRecognition()
     #jarvis = Jarvis.Jarvis()
@@ -38,8 +47,8 @@ def main():
     #logging.info("RUNNING AUDIO")
     #audio.start()
 
-    logging.info("RUNNING IMAGE RECOGNITION")
-    image.start()
+    #logging.info("RUNNING IMAGE RECOGNITION")
+    #image.start()
 
     #logging.info("RUNNING JARVIS")
     #jarvis.start()
@@ -53,7 +62,7 @@ def main():
     # Stop
     #server.stop()
     video.stop()
-    image.stop()
+    #image.stop()
     #audio.stop()
     #jarvis.stop()
 

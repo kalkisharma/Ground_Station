@@ -33,7 +33,7 @@ class MAVServer:
     def conn_server(self):
 
         logging.info("SERVER IP -> {0}, SERVER PORT -> {1}".format(self.ip, self.port))
-        server = mavutil.mavlink_connection('tcpin:{0}:{1}'.format(self.ip, self.port), planner_format=False,
+        server = mavutil.mavlink_connection('udpin:{0}:{1}'.format(self.ip, self.port), planner_format=False,
                                             notimestamps=True, robust_parsing=True)
         logging.info("SERVER CREATED")
         self.server = server
@@ -90,6 +90,7 @@ class MAVServer:
 
     def send_msg(self):
         logging.info("STARTING SEND THREAD")
+        time_prev = time.time()
 
         while not self.close_threads:
 
@@ -103,6 +104,8 @@ class MAVServer:
             #Shared.data.msg_payload_send[0] = 0
 
             Shared.data.mav_lock.release()
+            logging.debug(f"TIME TO SEND MSG: {time.time()-time_prev}")
+            time_prev = time.time()
 
             # SETPOINTS
             self.server.mav.set_position_target_local_ned_send(
@@ -190,7 +193,7 @@ class MAVServer:
             except KeyboardInterrupt:
                 self.close_recv_thread()
                 return
-            (time.sleep(0.1))
+            #(time.sleep(0.1))
 
         self.close_recv_thread()
 
