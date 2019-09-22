@@ -5,11 +5,10 @@ import Shared
 
 class MyVideoCapture:
 
-    def __init__(self, video_source=0, show_video=True):
+    def __init__(self, video_source=(0, 0), show_video=True):
         self.close_thread = False
         self.show_video = show_video
-        #self.vid = cv2.VideoCapture('udpsrc port=5000 caps = "application/x-rtp, media=(string)video, clock-rate=(int)90000, encoding-name=(string)H264, payload=(int)96" ! rtph264depay ! decodebin ! videoconvert ! appsink', cv2.CAP_GSTREAMER)
-        self.vid = cv2.VideoCapture(video_source)
+        self.vid = cv2.VideoCapture(video_source[0], video_source[1])
         self.video_source = video_source
         if not self.vid.isOpened():
             raise ValueError("Unable to open video source", video_source)
@@ -27,6 +26,7 @@ class MyVideoCapture:
             #self.window.mainloop()
 
     def get_frame(self):
+        ret = None
         if self.vid.isOpened():
             ret, frame = self.vid.read()
             if ret:

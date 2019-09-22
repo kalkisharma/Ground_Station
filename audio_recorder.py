@@ -1,3 +1,4 @@
+"""
 import pyaudio
 import wave
 import speech_recognition as sr
@@ -112,3 +113,4 @@ class AudioRecorder():
         Shared.data.audio_lock.acquire()
         Shared.data.listening = False
         Shared.data.audio_lock.release()
+"""
