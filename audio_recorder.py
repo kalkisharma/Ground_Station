@@ -1,7 +1,7 @@
 """
 import pyaudio
 import wave
-import speech_recognition as sr
+#import speech_recognition as sr
 from playsound import playsound
 
 import threading
@@ -113,4 +113,8 @@ class AudioRecorder():
         Shared.data.audio_lock.acquire()
         Shared.data.listening = False
         Shared.data.audio_lock.release()
+<<<<<<< HEAD
 """
+=======
+"""
+>>>>>>> 42b6059a3400f78ce80576de4cc4ee3732a0917f

@@ -33,7 +33,7 @@ class MAVServer:
     def conn_server(self):
 
         logging.info("SERVER IP -> {0}, SERVER PORT -> {1}".format(self.ip, self.port))
-        server = mavutil.mavlink_connection('tcpin:{0}:{1}'.format(self.ip, self.port), planner_format=False,
+        server = mavutil.mavlink_connection('udpin:{0}:{1}'.format(self.ip, self.port), planner_format=False,
                                             notimestamps=True, robust_parsing=True)
         logging.info("SERVER CREATED")
         self.server = server
@@ -90,7 +90,12 @@ class MAVServer:
 
     def send_msg(self):
         logging.info("STARTING SEND THREAD")
+<<<<<<< HEAD
         logging.info(f"SENDING {self.msg_per_second} MESSAGES EVERY SECOND")
+=======
+        time_prev = time.time()
+
+>>>>>>> 42b6059a3400f78ce80576de4cc4ee3732a0917f
         while not self.close_threads:
 
             # Get latest update of data to be sent to the quad
@@ -103,6 +108,8 @@ class MAVServer:
             #Shared.data.msg_payload_send[0] = 0
 
             Shared.data.mav_lock.release()
+            logging.debug(f"TIME TO SEND MSG: {time.time()-time_prev}")
+            time_prev = time.time()
 
             # SETPOINTS
             self.server.mav.set_position_target_local_ned_send(
