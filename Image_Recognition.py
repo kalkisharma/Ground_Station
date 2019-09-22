@@ -38,8 +38,8 @@ class MAVImageRecognition:
                 detect_package()
             elif Shared.data.detect_an_flag:
                 detect_OCR()
-            #else:
-                #Shared.data.frame_image_recognition = Shared.data.frame
+            else:
+                Shared.data.frame_image_recognition = Shared.data.frame
 
         return
 

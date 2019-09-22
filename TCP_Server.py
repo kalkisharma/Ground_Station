@@ -91,6 +91,9 @@ class MAVServer:
     def send_msg(self):
         logging.info("STARTING SEND THREAD")
         logging.info(f"SENDING {self.msg_per_second} MESSAGES EVERY SECOND")
+
+        time_prev = time.time()
+
         while not self.close_threads:
 
             # Get latest update of data to be sent to the quad
@@ -103,6 +106,8 @@ class MAVServer:
             #Shared.data.msg_payload_send[0] = 0
 
             Shared.data.mav_lock.release()
+            logging.debug(f"TIME TO SEND MSG: {time.time()-time_prev}")
+            time_prev = time.time()
 
             # SETPOINTS
             self.server.mav.set_position_target_local_ned_send(

@@ -48,7 +48,7 @@ def store_qr():
                 Shared.data.barcode_list.append(barcodeData)
             else:
                 #print(barcodeData)
-                if barcodeData in barcode_list:
+                if barcodeData in Shared.data.barcode_list:
 
                     text = "Barcode {} in list".format(barcodeData)
                     cv2.putText(image, text, (50, 50), cv2.FONT_HERSHEY_SIMPLEX,
