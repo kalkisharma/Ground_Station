@@ -5,17 +5,16 @@ import Shared
 
 class MyVideoCapture:
 
-<<<<<<< HEAD
     def __init__(self, video_source=(0, 0), show_video=True):
         self.close_thread = False
         self.show_video = show_video
         self.vid = cv2.VideoCapture(video_source[0], video_source[1])
-=======
+
     def __init__(self, video_source=[0,0], show_video=False):
         self.close_thread = False
         self.show_video = show_video
         #self.video_source = ['udpsrc port=9999 caps = "application/x-rtp, media=(string)video, clock-rate=(int)90000, encoding-name=(string)H264, payload=(int)96" ! rtph264depay ! decodebin ! videoconvert ! appsink', cv2.CAP_GSTREAMER]
->>>>>>> 42b6059a3400f78ce80576de4cc4ee3732a0917f
+
         self.video_source = video_source
 
     def __initialise__(self):
@@ -37,11 +36,11 @@ class MyVideoCapture:
             #self.window.mainloop()
 
     def get_frame(self):
-<<<<<<< HEAD
+
         ret = None
-=======
+
         ret = False
->>>>>>> 42b6059a3400f78ce80576de4cc4ee3732a0917f
+
         if self.vid.isOpened():
             ret, frame = self.vid.read()
             if ret:

@@ -115,6 +115,3 @@ class AudioRecorder():
         Shared.data.audio_lock.release()
 <<<<<<< HEAD
 """
-=======
-"""
->>>>>>> 42b6059a3400f78ce80576de4cc4ee3732a0917f
