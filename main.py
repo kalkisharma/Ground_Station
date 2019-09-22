@@ -26,7 +26,7 @@ def main():
     Shared.data.video_source = 0
 
     Shared.data.ip = "192.168.1.2" # Server IP
-    Shared.data.port = 5000 # Server Port
+    Shared.data.port = 9999 # Server Port
     Shared.data.video_source = ['udpsrc port=9999 caps = "application/x-rtp, '
                                 'media=(string)video, clock-rate=(int)90000, encoding-name=(string)H264, '
                                 'payload=(int)96" ! rtph264depay ! avdec_h264 ! queue ! '
@@ -35,9 +35,10 @@ def main():
     # Initialize class objects
     server = TCP_Server.MAVServer()
 
-    video = Video_Capture.MyVideoCapture(Shared.data.video_source, show_video=False)
+    video_gsteamer = Video_Capture.MyVideoCapture(Shared.data.video_source, show_video=False, type='gstreamer')
+    video_fpv = Video_Capture.MyVideoCapture(4, show_video=False, type='fpv')
 
-    video = Video_Capture.MyVideoCapture()
+    #video = Video_Capture.MyVideoCapture()
 
     #audio = audio_recorder.AudioRecorder('machine.pmdl', 0.5)
     image = Image_Recognition.MAVImageRecognition()
@@ -49,7 +50,8 @@ def main():
     server.start()
 
     logging.info("RUNNING VIDEO")
-    video.start()
+    video_gsteamer.start()
+    video_fpv.start()
 
     #logging.info("RUNNING AUDIO")
     #audio.start()
@@ -68,7 +70,8 @@ def main():
 
     # Stop
     server.stop()
-    video.stop()
+    video_gsteamer.stop()
+    video_fpv.stop()
     #image.stop()
     #audio.stop()
     #jarvis.stop()

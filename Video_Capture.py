@@ -5,10 +5,11 @@ import Shared
 
 class MyVideoCapture:
 
-    def __init__(self, video_source=(0, 0), show_video=True):
+    def __init__(self, video_source=(0, 0), show_video=True, type='cam'):
         self.close_thread = False
         self.show_video = show_video
         self.vid = cv2.VideoCapture(video_source[0], video_source[1])
+        self.type = type
 
     def __init__(self, video_source=[0,0], show_video=False):
         self.close_thread = False
@@ -63,9 +64,14 @@ class MyVideoCapture:
     def start_video(self):
 
         while not self.close_thread:
+
             ret, frame = self.get_frame()
-            Shared.data.frame = frame
-            Shared.data.ret = ret
+            if serf.type=='fpv':
+                Shared.data.frame_fpv = frame
+                Shared.data.ret_fpv = ret
+            else:
+                Shared.data.frame = frame
+                Shared.data.ret = ret
             if self.show_video:
                 cv2.imshow("output", Shared.data.frame) #np.hstack([frame, output])) #np.hstack([frame, output]))
                 if cv2.waitKey(1) & 0xFF == ord('q'):
