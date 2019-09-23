@@ -1,6 +1,6 @@
 import threading
 import logging
-import TCP_Server
+#import TCP_Server
 import Image_Recognition
 import Jarvis
 import GUI
@@ -35,23 +35,23 @@ def main():
     # Initialize class objects
     #server = TCP_Server.MAVServer()
 
-    video_gsteamer = Video_Capture.MyVideoCapture(Shared.data.video_source, show_video=False, type_source='gstreamer')
-    video_fpv = Video_Capture.MyVideoCapture(1, show_video=False, type_source='fpv')
+    #video_gsteamer = Video_Capture.MyVideoCapture(Shared.data.video_source, show_video=False, type_source='gstreamer')
+    #video_fpv = Video_Capture.MyVideoCapture(1, show_video=False, type_source='fpv')
 
     #video = Video_Capture.MyVideoCapture()
 
     #audio = audio_recorder.AudioRecorder('machine.pmdl', 0.5)
-    image = Image_Recognition.MAVImageRecognition()
+    #image = Image_Recognition.MAVImageRecognition()
     #jarvis = Jarvis.Jarvis()
     gui = GUI.GUI()
 
     # Start
-    logging.info("RUNNING SERVER")
+    #logging.info("RUNNING SERVER")
     #server.start()
 
-    logging.info("RUNNING VIDEO")
-    video_gsteamer.start()
-    video_fpv.start()
+    #logging.info("RUNNING VIDEO")
+    #video_gsteamer.start()
+    #video_fpv.start()
 
     #logging.info("RUNNING AUDIO")
     #audio.start()
@@ -70,8 +70,8 @@ def main():
 
     # Stop
     #server.stop()
-    video_gsteamer.stop()
-    video_fpv.stop()
+    #video_gsteamer.stop()
+    #video_fpv.stop()
     #image.stop()
     #audio.stop()
     #jarvis.stop()

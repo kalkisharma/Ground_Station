@@ -50,6 +50,8 @@ class data:
                     'type' : 'QR/AN/Package',
                     'pixel' : [] # List of pixel width and height relative to frame size
                 }
+    gui_video_width = 320
+    gui_video_height = 240
 
     # image recognition flags
     detect_qr_flag = False

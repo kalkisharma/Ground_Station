@@ -102,10 +102,10 @@ class command_page(tk.Frame):
 
         #self.create_graph_canvas()
         self.create_video_canvas(_row=0, _column=0)
-        self.create_video_textbox(_row=1, _column=0)
-        self.create_image_buttons(_row=1, _column=1)
-        self.create_package_buttons(_row=5, _column=1)
-        self.create_movement_buttons(_row=0, _column=2)
+        self.create_video_textbox(_row=10, _column=10)
+        self.create_image_buttons(_row=0, _column=20)
+        #self.create_package_buttons(_row=5, _column=1)
+        #self.create_movement_buttons(_row=0, _column=2)
         self._video()
         #self._plot()
         #self._listen_check()
@@ -185,17 +185,20 @@ class command_page(tk.Frame):
         width = Shared.data.video_width
         height = Shared.data.video_height
 
+        _rowspan=10
+        _columnspan=10
+
         self.video_canvas = tk.Canvas(self, bg='blue', width = width, height = height)#, width=1000, height=1000)
         self.video_canvas.grid(row=_row, column=_column, rowspan=_rowspan, columnspan=_columnspan)
 
-        _column+=1
-        self.video_canvas_fpv = tk.Canvas(self, bg='red', width=width, height=height)  # , width=1000, height=1000)
-        self.video_canvas_fpv.grid(row=_row, column=_column, rowspan=_rowspan, columnspan=_columnspan)
-
-        _row+=1
+        _column+=10
         self.video_canvas_ir = tk.Canvas(self, bg='green', width = width, height = height)#, width=1000, height=1000)
         self.video_canvas_ir.grid(row=_row, column=_column, rowspan=_rowspan, columnspan=_columnspan)
 
+        _row+=10
+        _column-=10
+        self.video_canvas_fpv = tk.Canvas(self, bg='red', width=width, height=height)  # , width=1000, height=1000)
+        self.video_canvas_fpv.grid(row=_row, column=_column, rowspan=_rowspan, columnspan=_columnspan)
 
     def create_video_textbox(self, _row=0, _column=0, _rowspan=1, _columnspan=1):
 
