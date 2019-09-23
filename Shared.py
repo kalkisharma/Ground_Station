@@ -60,6 +60,7 @@ class data:
     pickup_flag = False
     find_shelf = False
     find_shelf_row = False
+    log_package_flag = False
 
     # recognition values
     barcode_list = ['0000']

@@ -68,6 +68,10 @@ class MAVImageRecognition:
                             logging.info("FOUND SHELF ROW VIA AN")
                             Shared.data.find_shelf_row = False
 
+            elif Shared.data.log_package_flag:
+
+                detect_qr()            
+
             else:
                 Shared.data.frame_image_recognition = Shared.data.frame
 

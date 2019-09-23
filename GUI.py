@@ -8,6 +8,7 @@ import cv2
 import math
 import time
 import PIL.Image, PIL.ImageTk
+import logging
 
 import Shared
 import signal
@@ -156,6 +157,33 @@ class command_page(tk.Frame):
         _row+=1
         self.shelf_number_detect_button = tk.Button(self, text='Shelf Number', command=self.detect_shelf_number)
         self.shelf_number_detect_button.grid(row=_row, column=_column, rowspan=_rowspan, columnspan=_columnspan)
+
+        _row+=1
+        self.shelf_row_detect_button = tk.Button(self, text='Shelf Row', command=self.detect_shelf_row)
+        self.shelf_row_detect_button.grid(row=_row, column=_column, rowspan=_rowspan, columnspan=_columnspan)
+
+        _row+=1
+        self.log_packages_button = tk.Button(self, text='Package Log', command=self.log_packages)
+        self.log_packages_button.grid(row=_row, column=_column, rowspan=_rowspan, columnspan=_columnspan)
+
+    def log_packages(self):
+
+        if Shared.data.log_package_flag:
+            self.log_packages_button.config(relief=tk.RAISED)
+            Shared.data.log_package_flag = False
+            logging.info(f"PACKAGE LOG VALUES: {Shared.data.package_log}")
+        else:
+            self.log_packages_button.config(relief=tk.SUNKEN)
+            Shared.data.log_package_flag = True
+
+    def detect_shelf_row(self):
+
+        if Shared.data.find_shelf_row:
+            self.shelf_row_detect_button.config(relief=tk.RAISED)
+            Shared.data.find_shelf_row = False
+        else:
+            self.shelf_row_detect_button.config(relief=tk.SUNKEN)
+            Shared.data.find_shelf_row = True
 
     def detect_shelf_number(self):
 

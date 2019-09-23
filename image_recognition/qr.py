@@ -126,6 +126,17 @@ def detect_qr():
                         'pixel' :  pixel_data# List of pixel width and height relative to frame size
                     }
                     break
+            elif Shared.data.find_shelf_row:
+                if barcodeData not in Shared.data.package_log:
+                    package_log.append(barcodeData)
+                    Shared.data.image_data = {
+                        'data' : barcodeData, # List of values obtained from detection (e.g. qr code values)
+                        'time' : time.time(),
+                        'type' : 'QR',
+                        'pixel' :  pixel_data# List of pixel width and height relative to frame size
+                    }
+                    break
+
             """
             if barcodeData in Shared.data.barcode_list:
 
