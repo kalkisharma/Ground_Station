@@ -39,8 +39,8 @@ class data:
     frame_image_recognition = np.zeros((480,640,3), np.uint8)
     ret = None
     ret_fpv = None
-    video_width = 640
-    video_height = 480
+    video_width = 320
+    video_height = 240
     FOVU = 0.840248046
     FOVV = 0.648415104
     pixel_pos = [0,0]

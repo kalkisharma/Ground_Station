@@ -33,10 +33,10 @@ def main():
                                 'videoconvert ! appsink',cv2.CAP_GSTREAMER]
 
     # Initialize class objects
-    server = TCP_Server.MAVServer()
+    #server = TCP_Server.MAVServer()
 
-    video_gsteamer = Video_Capture.MyVideoCapture(Shared.data.video_source, show_video=False, type='gstreamer')
-    video_fpv = Video_Capture.MyVideoCapture(4, show_video=False, type='fpv')
+    video_gsteamer = Video_Capture.MyVideoCapture(Shared.data.video_source, show_video=False, type_source='gstreamer')
+    video_fpv = Video_Capture.MyVideoCapture(1, show_video=False, type_source='fpv')
 
     #video = Video_Capture.MyVideoCapture()
 
@@ -47,7 +47,7 @@ def main():
 
     # Start
     logging.info("RUNNING SERVER")
-    server.start()
+    #server.start()
 
     logging.info("RUNNING VIDEO")
     video_gsteamer.start()
@@ -62,14 +62,14 @@ def main():
     #logging.info("RUNNING JARVIS")
     #jarvis.start()
 
-    while not server.server_started:
-        time.sleep(0.1)
+    #while not server.server_started:
+    #    time.sleep(0.1)
 
     logging.info("RUNNING GUI")
     gui.start()
 
     # Stop
-    server.stop()
+    #server.stop()
     video_gsteamer.stop()
     video_fpv.stop()
     #image.stop()

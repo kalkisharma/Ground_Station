@@ -5,12 +5,28 @@ import Shared
 
 class MyVideoCapture:
 
-    def __init__(self, video_source=(0, 0), show_video=True, type='cam'):
+    def __init__(self, video_source=0, show_video=True, type_source='cam'):
+        self.video_source = video_source
         self.close_thread = False
         self.show_video = show_video
-        self.vid = cv2.VideoCapture(video_source[0], video_source[1])
-        self.type = type
+        self.type = type_source
+        if self.type=='gstreamer':
 
+            self.vid = cv2.VideoCapture(video_source[0], video_source[1])
+        else:
+
+            self.vid = cv2.VideoCapture(video_source)
+
+
+        if not self.vid.isOpened():
+            raise ValueError("Unable to open video source", self.video_source)
+
+        # Get video source width and height
+        self.width = self.vid.get(cv2.CAP_PROP_FRAME_WIDTH)
+        self.height = self.vid.get(cv2.CAP_PROP_FRAME_HEIGHT)
+        Shared.data.video_width = self.width
+        Shared.data.video_height = self.height
+    """
     def __init__(self, video_source=[0,0], show_video=False):
         self.close_thread = False
         self.show_video = show_video
@@ -29,7 +45,7 @@ class MyVideoCapture:
         self.height = self.vid.get(cv2.CAP_PROP_FRAME_HEIGHT)
         Shared.data.video_width = self.width
         Shared.data.video_height = self.height
-
+    """
     # Release the video source when the object is destroyed
     def __del__(self):
         if self.vid.isOpened():
@@ -53,7 +69,7 @@ class MyVideoCapture:
             return (ret, None)
 
     def start(self):
-        self.__initialise__()
+        #self.__initialise__()
         self.start_video_thread()
 
     def start_video_thread(self):
@@ -66,7 +82,7 @@ class MyVideoCapture:
         while not self.close_thread:
 
             ret, frame = self.get_frame()
-            if serf.type=='fpv':
+            if self.type=='fpv':
                 Shared.data.frame_fpv = frame
                 Shared.data.ret_fpv = ret
             else:
