@@ -189,8 +189,13 @@ class command_page(tk.Frame):
         self.video_canvas.grid(row=_row, column=_column, rowspan=_rowspan, columnspan=_columnspan)
 
         _column+=1
+        self.video_canvas_fpv = tk.Canvas(self, bg='red', width=width, height=height)  # , width=1000, height=1000)
+        self.video_canvas_fpv.grid(row=_row, column=_column, rowspan=_rowspan, columnspan=_columnspan)
+
+        _row+=1
         self.video_canvas_ir = tk.Canvas(self, bg='green', width = width, height = height)#, width=1000, height=1000)
         self.video_canvas_ir.grid(row=_row, column=_column, rowspan=_rowspan, columnspan=_columnspan)
+
 
     def create_video_textbox(self, _row=0, _column=0, _rowspan=1, _columnspan=1):
 
@@ -209,6 +214,7 @@ class command_page(tk.Frame):
         frame = np.copy(Shared.data.frame)
         ret = Shared.data.ret
         frame_ir = np.copy(Shared.data.frame_image_recognition)
+        frame_fpv = np.copy(Shared.data.frame_fpv)
         Shared.data.video_lock.release()
 
         if ret:
@@ -217,6 +223,9 @@ class command_page(tk.Frame):
 
             self.photo_ir = PIL.ImageTk.PhotoImage(image = PIL.Image.fromarray(frame_ir))
             self.video_canvas_ir.create_image(0, 0, image=self.photo_ir, anchor=tk.NW)
+
+            self.photo_fpv = PIL.ImageTk.PhotoImage(image = PIL.Image.fromarray(frame_fpv))
+            self.video_canvas_fpv.create_image(0, 0, image=self.photo_fpv, anchor=tk.NW)
 
         # Update pixel location
         self.desired_pos_label.config(text=f'Desired Position\nx: {round(Shared.data.desired_pos[0],2)}\ny: {round(Shared.data.desired_pos[1],2)}\nz: {round(Shared.data.desired_pos[2],2)}')

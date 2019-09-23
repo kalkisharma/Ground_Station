@@ -33,11 +33,14 @@ class data:
     # video frames obtained from the quad
     video_source = 0
     video_lock = threading.Lock()
+    frame_fpv = np.zeros((480,640,3), np.uint8)
+    frame_gstreamer = np.zeros((480,640,3), np.uint8)
     frame = np.zeros((480,640,3), np.uint8)
     frame_image_recognition = np.zeros((480,640,3), np.uint8)
     ret = None
-    video_width = 640
-    video_height = 480
+    ret_fpv = None
+    video_width = 320
+    video_height = 240
     FOVU = 0.840248046
     FOVV = 0.648415104
     pixel_pos = [0,0]
