@@ -129,8 +129,8 @@ def detect_OCR():
                                                        config='-c tessedit_char_whitelist=0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ')
                     #print(len(text))
                     if len(text) == 3:
-                        if Shared.data.find_shelf:
-                            if text==Shared.data.shelf_number[1]:
+                        if Shared.data.find_shelf_row:
+                            if text==Shared.data.shelf_row[1]:
                                 pixel_data = (x, y, rectH/frame.shape[0], rectW/frame.shape[1])
                                 h = int(rectH)
                                 w = int(rectW)
@@ -201,7 +201,7 @@ def detect_OCR():
                             dilated.shape[0] * dilated.shape[1]) \
                             and ((Cx - 0.5 * dilated.shape[1]) ** 2 + (Cy - 0.5 * dilated.shape[0]) ** 2) ** (
                             0.5) < 0.25 * dilated.shape[0] \
-                            and 0.9 > h / w > 0.6:
+                            and 1.0 > h / w > 0.6:
                         isText = True
                         break
 
