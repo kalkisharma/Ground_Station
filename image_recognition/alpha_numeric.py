@@ -129,17 +129,27 @@ def detect_OCR():
                                                        config='-c tessedit_char_whitelist=0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ')
                     #print(len(text))
                     if len(text) == 3:
-                        pixel_data = (x, y, rectH/frame.shape[0], rectW/frame.shape[1])
-                        h = int(rectH)
-                        w = int(rectW)
-                        x = int(x)
-                        y = int(y)
-                        #print(x,y,w,h)
-                        data = text
-                        cv2.rectangle(frame, (x - w//2, y - h//2), (x + w//2, y + h//2), (0, 0, 255), 2)
-                        #cv2.circle(frame, (x,y), 10, (0,0,255))
-                        output['data'].append(["Shelf",text, np.array([x, y, rectH/frame.shape[0], rectW/frame.shape[1]])])
-                        Shared.data.frame_image_recognition = frame
+                        if Shared.data.find_shelf:
+                            if text==Shared.data.shelf_number[1]:
+                                pixel_data = (x, y, rectH/frame.shape[0], rectW/frame.shape[1])
+                                h = int(rectH)
+                                w = int(rectW)
+                                x = int(x)
+                                y = int(y)
+                                #print(x,y,w,h)
+                                data = text
+                                cv2.rectangle(frame, (x - w//2, y - h//2), (x + w//2, y + h//2), (0, 0, 255), 2)
+                                #cv2.circle(frame, (x,y), 10, (0,0,255))
+                                output['data'].append(["Shelf",text, np.array([x, y, rectH/frame.shape[0], rectW/frame.shape[1]])])
+                                Shared.data.frame_image_recognition = frame
+                                Shared.data.image_data = {
+                                    'data' : data, # List of values obtained from detection (e.g. qr code values)
+                                    'time' : time.time(),
+                                    'type' : 'AN',
+                                    'pixel' :  pixel_data# List of pixel width and height relative to frame size
+                                }
+                                break
+
             elif 1.2 > aspect_ratio > 0.8:
                 # We're pretty sure now we have the shelf label corners. Now we need to rotate and extract text
                 # We then first need to extract label corners (from approx) by identifying top-left, top-right,

@@ -39,15 +39,35 @@ class MAVImageRecognition:
             elif Shared.data.detect_an_flag:
                 detect_OCR()
             elif Shared.data.find_shelf:
+
                 detect_qr()
 
                 if Shared.data.image_data['data']==Shared.data.shelf_number[0]:
                     logging.info("FOUND SHELF VIA QR")
-                    detect_OCR()
 
-                    if Shared.data.image_data['data']==Shared.data.shelf_number[1]:
-                        logging.info("FOUND SHELF VIA AN")
-                        Shared.data.find_shelf = False
+                    while Shared.data.find_shelf:
+
+                        detect_OCR()
+
+                        if Shared.data.image_data['data']==Shared.data.shelf_number[1]:
+                            logging.info("FOUND SHELF VIA AN")
+                            Shared.data.find_shelf = False
+
+            elif Shared.data.find_shelf_row:
+
+                detect_qr()
+
+                if Shared.data.image_data['data']==Shared.data.shelf_row[0]:
+                    logging.info("FOUND SHELF ROW VIA QR")
+
+                    while Shared.data.find_shelf_row:
+
+                        detect_OCR()
+
+                        if Shared.data.image_data['data']==Shared.data.shelf_row[1]:
+                            logging.info("FOUND SHELF ROW VIA AN")
+                            Shared.data.find_shelf_row = False
+
             else:
                 Shared.data.frame_image_recognition = Shared.data.frame
 
