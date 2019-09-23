@@ -33,7 +33,7 @@ def detect_OCR():
     edges = cv2.GaussianBlur(edges, (3, 3), 0)
 
     # Find contours in the image
-    (cnts, hierarchy) = cv2.findContours(edges.copy(), cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    (_, cnts, hierarchy) = cv2.findContours(edges.copy(), cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     data = []
     pixel_data = []
     # We are looking for a rectangular label, hence we only look at contours with four corners
@@ -101,7 +101,7 @@ def detect_OCR():
                                   dtype=np.uint8)
                 dilated = cv2.morphologyEx(straight, cv2.MORPH_ERODE, kernel, iterations=3)
                 dilated = cv2.bitwise_not(dilated)
-                (conts, _) = cv2.findContours(dilated, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+                (_, conts, _) = cv2.findContours(dilated, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
                 isText = False
                 for cont in conts:
                     minrect = cv2.minAreaRect(cont)
@@ -158,7 +158,8 @@ def detect_OCR():
                     br = bot[1] if bot[0][0] < bot[1][0] else bot[0]
                 else:
                     continue
-
+                cv2.rectangle(frame, (tl[0], tl[1]), (br[0], br[1]), (0, 0, 255), 2)
+                Shared.data.frame_image_recognition = frame
                 # De-rotate/warp to straighten sign
                 pts1 = np.float32([tl, bl, br, tr])
                 pts2 = np.float32(
@@ -180,7 +181,7 @@ def detect_OCR():
                                   dtype=np.uint8)
                 dilated = cv2.morphologyEx(straight, cv2.MORPH_ERODE, kernel, iterations=3)
                 dilated = cv2.bitwise_not(dilated)
-                (conts, _) = cv2.findContours(dilated, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+                (_, conts, _) = cv2.findContours(dilated, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
                 isText = False
                 for cont in conts:
                     minrect = cv2.minAreaRect(cont)
@@ -206,6 +207,7 @@ def detect_OCR():
                     text = pytesseract.image_to_string(PILimg,
                                                        config='-c tessedit_char_whitelist=0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ')
                     # print(len(text))
+                    print (text)
                     if len(text) == 2:
                         if Shared.data.find_shelf:
                             if text==Shared.data.shelf_number[1]:
