@@ -149,9 +149,22 @@ class command_page(tk.Frame):
         self.an_detect_button = tk.Button(self, text='AN', command=self.detect_an)
         self.an_detect_button.grid(row=_row, column=_column, rowspan=_rowspan, columnspan=_columnspan)
 
-        _row+=2
+        _row+=1
         self.package_detect_button = tk.Button(self, text='Package', command=self.detect_package)
         self.package_detect_button.grid(row=_row, column=_column, rowspan=_rowspan, columnspan=_columnspan)
+
+        _row+=1
+        self.shelf_number_detect_button = tk.Button(self, text='Shelf Number', command=self.detect_shelf_number)
+        self.shelf_number_detect_button.grid(row=_row, column=_column, rowspan=_rowspan, columnspan=_columnspan)
+
+    def detect_shelf_number(self):
+
+        if Shared.data.find_shelf:
+            self.shelf_number_detect_button.config(relief=tk.RAISED)
+            Shared.data.find_shelf = False
+        else:
+            self.shelf_number_detect_button.config(relief=tk.SUNKEN)
+            Shared.data.find_shelf = True
 
     def detect_package(self):
 

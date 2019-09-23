@@ -58,10 +58,15 @@ class data:
     detect_an_flag = False
     detect_package_flag = False
     pickup_flag = False
+    find_shelf = False
 
     # recognition values
     barcode_list = ['0000']
     an_list = ['1A']
+
+    shelf_number = ['1', '11']
+    shelf_row = ['1004', '21B']
+    package_log = []
 
     # position flags
     initial_pos_flag = False

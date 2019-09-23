@@ -207,17 +207,26 @@ def detect_OCR():
                                                        config='-c tessedit_char_whitelist=0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ')
                     # print(len(text))
                     if len(text) == 2:
-                        pixel_data = (x, y, rectH / frame.shape[0], rectW / frame.shape[1])
-                        h = int(rectH)
-                        w = int(rectW)
-                        x = int(x)
-                        y = int(y)
-                        # print(x,y,w,h)
-                        data = text
-                        cv2.rectangle(frame, (x - w // 2, y - h // 2), (x + w // 2, y + h // 2), (0, 0, 255), 2)
-                        output['data'].append(
-                            ["Aisle", text, np.array([x, y, rectH / frame.shape[0], rectW / frame.shape[1]])])
-                        Shared.data.frame_image_recognition = frame
+                        if Shared.data.find_shelf:
+                            if text==Shared.data.shelf_number[1]:
+                                pixel_data = (x, y, rectH / frame.shape[0], rectW / frame.shape[1])
+                                h = int(rectH)
+                                w = int(rectW)
+                                x = int(x)
+                                y = int(y)
+                                # print(x,y,w,h)
+                                data = text
+                                cv2.rectangle(frame, (x - w // 2, y - h // 2), (x + w // 2, y + h // 2), (0, 0, 255), 2)
+                                output['data'].append(
+                                    ["Aisle", text, np.array([x, y, rectH / frame.shape[0], rectW / frame.shape[1]])])
+                                Shared.data.frame_image_recognition = frame
+                                Shared.data.image_data = {
+                                    'data' : data, # List of values obtained from detection (e.g. qr code values)
+                                    'time' : time.time(),
+                                    'type' : 'AN',
+                                    'pixel' :  pixel_data# List of pixel width and height relative to frame size
+                                }
+                                break
 
     Shared.data.frame_image_recognition = frame
     Shared.data.image_data = {

@@ -108,13 +108,22 @@ def detect_qr():
             # print the barcode type and data to the terminal
             #print("[INFO] Found {} barcode: {}".format(barcodeType, barcodeData))
 
-
+            if Shared.data.find_shelf:
+                if barcodeData==Shared.data.shelf_number[0]:
+                    Shared.data.image_data = {
+                        'data' : barcodeData, # List of values obtained from detection (e.g. qr code values)
+                        'time' : time.time(),
+                        'type' : 'QR',
+                        'pixel' :  pixel_data# List of pixel width and height relative to frame size
+                    }
+                    break
+            """
             if barcodeData in Shared.data.barcode_list:
 
                 text = "Barcode {} in list".format(barcodeData)
                 cv2.putText(image, text, (50, 50), cv2.FONT_HERSHEY_SIMPLEX,
                     1, (0, 255, 0), 2)
-
+            """
             frame = image
 
     else:
