@@ -99,7 +99,7 @@ def detect_OCR():
                                    [0, 0, 0, 0, 0],
                                    [0, 0, 0, 0, 0]],
                                   dtype=np.uint8)
-                dilated = cv2.morphologyEx(straight, cv2.MORPH_ERODE, kernel, iterations=3)
+                dilated = cv2.morphologyEx(straight, cv2.MORPH_ERODE, kernel, iterations=4)
                 dilated = cv2.bitwise_not(dilated)
                 (_, conts, _) = cv2.findContours(dilated, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
                 isText = False
@@ -111,7 +111,7 @@ def detect_OCR():
                             dilated.shape[0] * dilated.shape[1]) \
                             and ((Cx - 0.5 * dilated.shape[1]) ** 2 + (Cy - 0.5 * dilated.shape[0]) ** 2) ** (
                     0.5) < 0.25 * dilated.shape[0] \
-                            and 0.6 > h / w > 0.2:
+                            and 0.7 > h / w > 0.2:
                         isText = True
                         #print("HERE")
                         break
@@ -189,7 +189,7 @@ def detect_OCR():
                                    [0, 0, 0, 0, 0],
                                    [0, 0, 0, 0, 0]],
                                   dtype=np.uint8)
-                dilated = cv2.morphologyEx(straight, cv2.MORPH_ERODE, kernel, iterations=3)
+                dilated = cv2.morphologyEx(straight, cv2.MORPH_ERODE, kernel, iterations=4)
                 dilated = cv2.bitwise_not(dilated)
                 (_, conts, _) = cv2.findContours(dilated, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
                 isText = False
@@ -197,11 +197,11 @@ def detect_OCR():
                     minrect = cv2.minAreaRect(cont)
                     (Cx, Cy), (w, h), angle = minrect
                     textarea = w * h
-                    if 0.3 * (dilated.shape[0] * dilated.shape[1]) > textarea > 0.01 * (
+                    if 0.35 * (dilated.shape[0] * dilated.shape[1]) > textarea > 0.01 * (
                             dilated.shape[0] * dilated.shape[1]) \
                             and ((Cx - 0.5 * dilated.shape[1]) ** 2 + (Cy - 0.5 * dilated.shape[0]) ** 2) ** (
                             0.5) < 0.25 * dilated.shape[0] \
-                            and 1.0 > h / w > 0.6:
+                            and 1.0 > h / w > 0.5:
                         isText = True
                         break
 
@@ -215,9 +215,8 @@ def detect_OCR():
                     # Extract text from image
                     PILimg = Image.fromarray(drc)
                     text = pytesseract.image_to_string(PILimg,
-                                                       config='-c tessedit_char_whitelist=0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ')
+                                                       config='-c tessedit_char_whitelist=0123456789')
                     # print(len(text))
-                    print (text)
                     if len(text) == 2:
                         if Shared.data.find_shelf:
                             if text==Shared.data.shelf_number[1]:

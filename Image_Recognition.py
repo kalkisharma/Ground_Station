@@ -66,6 +66,7 @@ class MAVImageRecognition:
 
                         if Shared.data.image_data['data']==Shared.data.shelf_row[1]:
                             logging.info("FOUND SHELF ROW VIA AN")
+                            print(Shared.data.image_data)
                             Shared.data.find_shelf_row = False
 
             elif Shared.data.log_package_flag:

@@ -16,8 +16,8 @@ def main():
     Shared.data.ip = "192.168.1.2" # Server IP
     Shared.data.port = 9999 # Server Port
     Shared.data.video_source = ('udpsrc port=9999 caps = "application/x-rtp, media=(string)video, clock-rate=(int)90000, ' \
-                               'encoding-name=(string)H264, payload=(int)96" ! rtph264depay ! avdec_h264 ! queue ! ' \
-                               'videoconvert ! appsink', cv2.CAP_GSTREAMER)
+                               'encoding-name=(string)H264, payload=(int)96" ! rtph264depay ! decodebin ! queue ! ' \
+                               'videoconvert ! appsink sync=false', cv2.CAP_GSTREAMER)
     Shared.data.ip = "localhost" # Server IP
     Shared.data.port = 9999 # Server Port
     Shared.data.video_source = 'udpsrc port=5000 caps = "application/x-rtp, ' \
@@ -29,14 +29,16 @@ def main():
     Shared.data.port = 9999 # Server Port
     Shared.data.video_source = ['udpsrc port=9999 caps = "application/x-rtp, '
                                 'media=(string)video, clock-rate=(int)90000, encoding-name=(string)H264, '
-                                'payload=(int)96" ! rtph264depay ! avdec_h264 ! queue ! '
-                                'videoconvert ! appsink',cv2.CAP_GSTREAMER]
+                                'payload=(int)96" ! rtph264depay ! decodebin ! queue ! '
+                                'videoconvert ! appsink sync=false',cv2.CAP_GSTREAMER]
+
+    Shared.data.video_source = ['udpsrc port=9999 caps = "application/x-rtp, '
+                                'media=(string)video, clock-rate=(int)90000, encoding-name=(string)JPEG, '
+                                'payload=(int)26" ! rtpjpegdepay ! jpegdec ! queue ! '
+                                'appsink sync=false', cv2.CAP_GSTREAMER]
 
     # Initialize class objects
-    #server = TCP_Server.MAVServer()
-
-    video_gsteamer = Video_Capture.MyVideoCapture(Shared.data.video_source, show_video=False, type_source='gstreamer')
-    video_fpv = Video_Capture.MyVideoCapture(1, show_video=False, type_source='fpv')
+    server = TCP_Server.MAVServer()
 
     #video = Video_Capture.MyVideoCapture()
 
@@ -46,9 +48,11 @@ def main():
     gui = GUI.GUI()
 
     # Start
-    #logging.info("RUNNING SERVER")
-    #server.start()
+    logging.info("RUNNING SERVER")
+    server.start()
 
+    video_gsteamer = Video_Capture.MyVideoCapture(Shared.data.video_source, show_video=False, type_source='gstreamer')
+    video_fpv = Video_Capture.MyVideoCapture(1, show_video=False, type_source='fpv')
     logging.info("RUNNING VIDEO")
     video_gsteamer.start()
     video_fpv.start()
@@ -62,14 +66,14 @@ def main():
     #logging.info("RUNNING JARVIS")
     #jarvis.start()
 
-    #while not server.server_started:
-    #    time.sleep(0.1)
+    while not server.server_started:
+        time.sleep(0.1)
 
     logging.info("RUNNING GUI")
     gui.start()
 
     # Stop
-    #server.stop()
+    server.stop()
     video_gsteamer.stop()
     video_fpv.stop()
     image.stop()
