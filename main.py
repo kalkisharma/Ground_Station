@@ -15,7 +15,7 @@ import Shared
 def main():
 
     # Set Global flags
-    RUN_TASK_FLAG = True
+    RUN_TASK_FLAG = False
     RUN_SERVER_FLAG = False
     RUN_WEBCAM_FLAG = True
     RUN_GSTREAMER_FLAG = False

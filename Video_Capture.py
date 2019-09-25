@@ -2,6 +2,7 @@ import cv2
 import threading
 import time
 import Shared
+import numpy as np
 
 class MyVideoCapture:
 
@@ -86,7 +87,7 @@ class MyVideoCapture:
                 Shared.data.frame_fpv = frame
                 Shared.data.ret_fpv = ret
             else:
-                Shared.data.frame = frame
+                Shared.data.frame = np.copy(frame)
                 Shared.data.ret = ret
             if self.show_video:
                 cv2.imshow("output", Shared.data.frame) #np.hstack([frame, output])) #np.hstack([frame, output]))
