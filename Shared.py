@@ -32,13 +32,19 @@ class data:
 
     # video frames obtained from the quad
     video_source = 0
+    webcam_source = 0
+    fpv_source = 0
+    gstreamer_source = (0,0)
     video_lock = threading.Lock()
     frame_fpv = np.zeros((480,640,3), np.uint8)
     frame_gstreamer = np.zeros((480,640,3), np.uint8)
-    frame = np.zeros((480,640,3), np.uint8)
+    frame_webcam = np.zeros((480,640,3), np.uint8)
+    frame = np.ones((480,640,3), np.uint8)
     frame_image_recognition = np.zeros((480,640,3), np.uint8)
     ret = None
     ret_fpv = None
+    ret_gstreamer = None
+    ret_webcam = None
     video_width = 320
     video_height = 240
     FOVU = 0.840248046
@@ -73,3 +79,8 @@ class data:
     # position flags
     initial_pos_flag = False
     initial_attitude_flag = False
+
+    # task indicators
+    task_canvas = None
+    takeoff_indicator = None
+    aisle_indicator = None

@@ -104,7 +104,8 @@ class command_page(tk.Frame):
         #self.create_graph_canvas()
         self.create_video_canvas(_row=0, _column=0)
         self.create_video_textbox(_row=10, _column=10)
-        self.create_image_buttons(_row=0, _column=20)
+        self.create_image_buttons(_row=10, _column=15)
+        self.create_checklist(_row=0, _column=20)
         #self.create_package_buttons(_row=5, _column=1)
         #self.create_movement_buttons(_row=0, _column=2)
         self._video()
@@ -113,6 +114,22 @@ class command_page(tk.Frame):
 
 
         #self.test()
+
+    def create_checklist(self, _row=1, _column=1, _rowspan=1, _columnspan=1):
+
+        self.task_canvas = tk.Canvas(self, bg='gray90')#, width = width, height = height)
+        Shared.data.task_canvas = self.task_canvas
+        self.task_canvas.grid(row=_row, column=_column, rowspan=_rowspan, columnspan=_columnspan)
+
+        Shared.data.takeoff_indicator = self.task_canvas.create_oval(10, 10, 25, 25, outline="black",
+            fill="white", width=1)
+        self.task_canvas.create_text(30, 17.5, anchor=tk.W, font=("Times", 14),
+            text="Takeoff")
+
+        Shared.data.aisle_indicator = self.task_canvas.create_oval(10, 30, 25, 45, outline="black",
+            fill="white", width=1)
+        self.task_canvas.create_text(30, 37.5, anchor=tk.W, font=("Times", 14),
+            text="Detect Aisle")
 
     def create_movement_buttons(self, _row=1, _column=1, _rowspan=1, _columnspan=1):
 
