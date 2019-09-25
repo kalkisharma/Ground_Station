@@ -117,6 +117,9 @@ class command_page(tk.Frame):
 
     def create_checklist(self, _row=1, _column=1, _rowspan=1, _columnspan=1):
 
+        _rowspan=10
+        _columnspan=10
+
         self.task_canvas = tk.Canvas(self, bg='gray90')#, width = width, height = height)
         Shared.data.task_canvas = self.task_canvas
         self.task_canvas.grid(row=_row, column=_column, rowspan=_rowspan, columnspan=_columnspan)
@@ -270,13 +273,13 @@ class command_page(tk.Frame):
     def _video(self):
 
         self.panel = None
-
-        Shared.data.video_lock.acquire()
-        frame = np.copy(Shared.data.frame)
+        time_start = time.time()
+        #Shared.data.video_lock.acquire()
+        frame = cv2.cvtColor(Shared.data.frame, cv2.COLOR_BGR2RGB)
         ret = Shared.data.ret
-        frame_ir = np.copy(Shared.data.frame_image_recognition)
-        frame_fpv = np.copy(Shared.data.frame_fpv)
-        Shared.data.video_lock.release()
+        frame_ir = cv2.cvtColor(Shared.data.frame_image_recognition, cv2.COLOR_BGR2RGB)
+        frame_fpv = cv2.cvtColor(Shared.data.frame_fpv, cv2.COLOR_BGR2RGB)
+        #Shared.data.video_lock.release()
 
         if ret:
             self.photo = PIL.ImageTk.PhotoImage(image = PIL.Image.fromarray(frame))
@@ -293,7 +296,10 @@ class command_page(tk.Frame):
 
         # Update current position
         self.curr_pos_label.config(text=f'Current Position\nx: {round(Shared.data.current_pos[0],2)}\ny: {round(Shared.data.current_pos[1],2)}\nz: {round(Shared.data.current_pos[2],2)}')
+        time_end = time.time()
 
+        fps = 1/(time_end-time_start)
+        logging.debug(f"FPS: {fps}")
         self.controller.after(100, self._video)
 
     def _plot(self):

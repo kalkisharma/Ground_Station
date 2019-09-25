@@ -33,6 +33,7 @@ class MAVImageRecognition:
             #store_qr()
             #display_qr()
             if Shared.data.detect_qr_flag:
+
                 detect_qr()
             elif Shared.data.detect_package_flag:
                 detect_package()
@@ -71,10 +72,11 @@ class MAVImageRecognition:
 
             elif Shared.data.log_package_flag:
 
-                detect_qr()            
+                detect_qr()
 
             else:
-                Shared.data.frame_image_recognition = Shared.data.frame
+
+                Shared.data.frame_image_recognition = np.copy(Shared.data.frame)
 
         return
 
