@@ -24,10 +24,10 @@ def main():
     RUN_GUI_FLAG = True
 
     # Set case variables
-    Shared.data.gstreamer_source = ['udpsrc port=9999 caps = "application/x-rtp, '
-                                'media=(string)video, clock-rate=(int)90000, encoding-name=(string)JPEG, '
-                                'payload=(int)26" ! rtpjpegdepay ! jpegdec ! queue ! '
-                                'appsink sync=false', cv2.CAP_GSTREAMER]
+    Shared.data.video_source = ['udpsrc port=9999 caps = "application/x-rtp, '
+                                'media=(string)video, clock-rate=(int)90000, encoding-name=(string)H264, '
+                                'payload=(int)96" ! rtph264depay ! h264parse ! avdec_h264 ! '
+                                'videoconvert ! appsink sync=false',cv2.CAP_GSTREAMER]
     Shared.data.fpv_source = 1
     Shared.data.webcam_source = 0
     Shared.data.ip = "192.168.1.2" # Server IP
@@ -46,11 +46,16 @@ def main():
                                'payload=(int)96" ! rtph264depay ! decodebin ! videoconvert ! appsink', cv2.CAP_GSTREAMER
     Shared.data.video_source = 0
 
-
     Shared.data.video_source = ['udpsrc port=9999 caps = "application/x-rtp, '
                                 'media=(string)video, clock-rate=(int)90000, encoding-name=(string)H264, '
                                 'payload=(int)96" ! rtph264depay ! decodebin ! queue ! '
                                 'videoconvert ! appsink sync=false',cv2.CAP_GSTREAMER]
+
+    Shared.data.gstreamer_source = ['udpsrc port=9999 caps = "application/x-rtp, '
+                                'media=(string)video, clock-rate=(int)90000, encoding-name=(string)JPEG, '
+                                'payload=(int)26" ! rtpjpegdepay ! jpegdec ! queue ! '
+                                'appsink sync=false', cv2.CAP_GSTREAMER]
+
     """
 
     if RUN_TASK_FLAG:
