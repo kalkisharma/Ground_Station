@@ -150,7 +150,7 @@ def detect_OCR():
                                 }
                                 break
 
-            elif 1.2 > aspect_ratio > 0.8:
+            """elif 1.2 > aspect_ratio > 0.8:
                 # We're pretty sure now we have the shelf label corners. Now we need to rotate and extract text
                 # We then first need to extract label corners (from approx) by identifying top-left, top-right,
                 # bottom-left, bottom-right
@@ -237,7 +237,7 @@ def detect_OCR():
                                     'type' : 'AN',
                                     'pixel' :  pixel_data# List of pixel width and height relative to frame size
                                 }
-                                break
+                                break"""
 
     Shared.data.frame_image_recognition = frame
     Shared.data.image_data = {

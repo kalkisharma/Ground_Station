@@ -83,12 +83,14 @@ class MyVideoCapture:
         while not self.close_thread:
 
             ret, frame = self.get_frame()
+
             if self.type=='fpv':
-                Shared.data.frame_fpv = frame
-                Shared.data.ret_fpv = ret
-            else:
                 Shared.data.frame = np.copy(frame)
                 Shared.data.ret = ret
+            else:
+                Shared.data.frame_fpv = frame
+                Shared.data.ret_fpv = ret
+
             if self.show_video:
                 cv2.imshow("output", Shared.data.frame) #np.hstack([frame, output])) #np.hstack([frame, output]))
                 if cv2.waitKey(1) & 0xFF == ord('q'):

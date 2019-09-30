@@ -15,18 +15,18 @@ import Shared
 def main():
 
     # Set Global flags
-    RUN_TASK_FLAG = False
-    RUN_SERVER_FLAG = False
-    RUN_WEBCAM_FLAG = True
-    RUN_GSTREAMER_FLAG = False
-    RUN_FPV_FLAG = False
+    RUN_TASK_FLAG = True
+    RUN_SERVER_FLAG = True
+    RUN_WEBCAM_FLAG = False
+    RUN_GSTREAMER_FLAG = True
+    RUN_FPV_FLAG = True
     RUN_RECOGNITION_FLAG = True
     RUN_GUI_FLAG = True
 
     # Set case variables
-    Shared.data.video_source = ['udpsrc port=9999 caps = "application/x-rtp, '
+    Shared.data.gstreamer_source = ['udpsrc port=9999 caps = "application/x-rtp, '
                                 'media=(string)video, clock-rate=(int)90000, encoding-name=(string)H264, '
-                                'payload=(int)96" ! rtph264depay ! h264parse ! avdec_h264 ! '
+                                'payload=(int)96" ! rtph264depay ! h264parse ! avdec_h264 ! queue ! '
                                 'videoconvert ! appsink sync=false',cv2.CAP_GSTREAMER]
     Shared.data.fpv_source = 1
     Shared.data.webcam_source = 0
@@ -61,13 +61,13 @@ def main():
     if RUN_TASK_FLAG:
 
         scheduler = tasks.TaskScheduler()
-        logging.info("RUNNING TASK SCHEDULER")
+        print("INFO: RUNNING TASK SCHEDULER")
         scheduler.start()
 
     if RUN_SERVER_FLAG:
 
         server = TCP_Server.MAVServer()
-        logging.info("RUNNING SERVER")
+        print("INFO: RUNNING SERVER")
         server.start()
         # Catch to ensure server has started and registered heartbeat
         while not server.server_started:
@@ -80,7 +80,7 @@ def main():
             show_video=False,
             type_source='webcam'
         )
-        logging.info("RUNNING WEBCAM")
+        print("INFO: RUNNING WEBCAM")
         video_webcam.start()
 
     elif RUN_GSTREAMER_FLAG:
@@ -90,7 +90,7 @@ def main():
             show_video=False,
             type_source='gstreamer'
         )
-        logging.info("RUNNING GSTREAMER")
+        print("INFO: RUNNING GSTREAMER")
         video_gsteamer.start()
 
     if RUN_FPV_FLAG:
@@ -100,28 +100,28 @@ def main():
             show_video=False,
             type_source='fpv'
         )
-        logging.info("RUNNING FPV")
+        print("INFO: RUNNING FPV")
         video_fpv.start()
 
     if RUN_RECOGNITION_FLAG:
 
         image = Image_Recognition.MAVImageRecognition()
-        logging.info("RUNNING IMAGE RECOGNITION")
+        print("INFO: RUNNING IMAGE RECOGNITION")
         image.start()
 
     if RUN_GUI_FLAG:
 
         gui = GUI.GUI()
-        logging.info("RUNNING GUI")
+        print("INFO: RUNNING GUI")
         gui.start()
 
     #audio = audio_recorder.AudioRecorder('machine.pmdl', 0.5)
     #jarvis = Jarvis.Jarvis()
 
-    #logging.info("RUNNING AUDIO")
+    #print("INFO: RUNNING AUDIO")
     #audio.start()
 
-    #logging.info("RUNNING JARVIS")
+    #print("INFO: RUNNING JARVIS")
     #jarvis.start()
 
     # Stop
@@ -143,4 +143,5 @@ def main():
 if __name__ == "__main__":
     # logging.basicConfig(filename="log.log", filemode="w", format='%(levelname)s:%(message)s', level=logging.INFO)
     logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.INFO)
+    print("INFO: HERE")
     main()

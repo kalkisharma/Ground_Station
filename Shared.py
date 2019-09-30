@@ -22,7 +22,7 @@ class data:
     msg_payload_send = [0]*8
     msg_per_second = 5
 
-    takeoff_altitude = 2
+    takeoff_altitude = -0.5
 
     # tcp ip values
     ip = '104.39.142.243'
@@ -67,14 +67,27 @@ class data:
     find_shelf = False
     find_shelf_row = False
     log_package_flag = False
+    find_pickup_flag = False
+    store_flag_flag = False
+    GUI_STARTED_FLAG = False
 
     # recognition values
     barcode_list = ['0000']
     an_list = ['1A']
-
+    shelf_code = [
+        '11A', '12A', '13A', '14A',
+        '21A', '22A', '23A', '24A',
+        '11B', '12B', '13A', '14B',
+        '21B', '22B', '23B', '24B'
+    ]
     shelf_number = ['1', '11']
     shelf_row = ['1004', '21B']
-    package_log = []
+    package_log = {}
+    current_shelf = ''
+    package_list = ['3', '2', '1', '0']#['V166D', '5419N', 'N4915', '1779F', 'B527C']
+    npackages = len(package_list)
+    found_packages = []
+    current_package = []
 
     # position flags
     initial_pos_flag = False
@@ -83,4 +96,6 @@ class data:
     # task indicators
     task_canvas = None
     takeoff_indicator = None
-    aisle_indicator = None
+    log_package_indicator = None
+    pickup_indicator = None
+    store_flag_indicator = None

@@ -32,10 +32,10 @@ class MAVServer:
 
     def conn_server(self):
 
-        logging.info("SERVER IP -> {0}, SERVER PORT -> {1}".format(self.ip, self.port))
+        print("INFO: SERVER IP -> {0}, SERVER PORT -> {1}".format(self.ip, self.port))
         server = mavutil.mavlink_connection('tcpin:{0}:{1}'.format(self.ip, self.port), planner_format=False,
                                             notimestamps=True, robust_parsing=True)
-        logging.info("SERVER CREATED")
+        print("INFO: SERVER CREATED")
         self.server = server
 
         return
@@ -43,12 +43,12 @@ class MAVServer:
     def wait_for_heartbeat(self):
 
         # Wait for a heartbeat so we know the target system IDs
-        logging.info("WAITING FOR APM HEARTBEAT")
+        print("INFO: WAITING FOR APM HEARTBEAT")
         try:
             msg = self.server.recv_match(type='HEARTBEAT', blocking=True)
-            logging.info(f"HEARTBEAT FROM APM ({self.server.target_system}, {self.server.target_system})")
+            print(f"INFO: HEARTBEAT FROM APM ({self.server.target_system}, {self.server.target_system})")
         except KeyboardInterrupt:
-            logging.info("USER EXIT WITHOUT FINDING HEARTBEAT")
+            print("INFO: USER EXIT WITHOUT FINDING HEARTBEAT")
         self.server_started = True
         return
 
@@ -60,7 +60,7 @@ class MAVServer:
 
     def start_recv_thread(self):
 
-        logging.info("SPAWNING RECV THREAD")
+        print("INFO: SPAWNING RECV THREAD")
 
         self.recv_flag = True
         self.recv_thread = threading.Thread(target=self.recv_msg)
@@ -70,7 +70,7 @@ class MAVServer:
 
     def start_send_thread(self):
 
-        logging.info("SPAWNING SEND THREAD")
+        print("INFO: SPAWNING SEND THREAD")
 
         self.send_flag = True
         self.send_thread = threading.Thread(target=self.send_msg)
@@ -89,8 +89,8 @@ class MAVServer:
         #self.send_thread.join()
 
     def send_msg(self):
-        logging.info("STARTING SEND THREAD")
-        logging.info(f"SENDING {self.msg_per_second} MESSAGES EVERY SECOND")
+        print("INFO: STARTING SEND THREAD")
+        print(f"INFO: SENDING {self.msg_per_second} MESSAGES EVERY SECOND")
 
         time_prev = time.time()
 
@@ -135,7 +135,7 @@ class MAVServer:
 
                 if msg_payload_send[0] > 0:
                     #send the command
-                    logging.info("SENDING COMMAND")
+                    print("INFO: SENDING COMMAND")
                     self.server.mav.command_long_send(
                         1, # autopilot system id
                         1, # autopilot component id
@@ -183,7 +183,7 @@ class MAVServer:
                     pass
 
                 if msg.get_type() == 'LOCAL_POSITION_NED':
-                    #logging.info(f"X: {msg.x} \t Y: {msg.y} Z: {msg.z}")
+                    #print(f"INFO: X: {msg.x} \t Y: {msg.y} Z: {msg.z}")
                     x = msg.x
                     y = msg.y
                     z = msg.z
@@ -197,7 +197,7 @@ class MAVServer:
                         Shared.data.initial_pos_flag = True
 
                 if msg.get_type() == 'ATTITUDE':
-                    #logging.info(f"X: {msg.x} \t Y: {msg.y} Z: {msg.z}")
+                    #print(f"INFO: X: {msg.x} \t Y: {msg.y} Z: {msg.z}")
                     roll = msg.roll
                     pitch = msg.pitch
                     yaw = msg.yaw
@@ -221,7 +221,7 @@ class MAVServer:
 
     def stop(self):
 
-        logging.info("CLOSING SERVER")
+        print("INFO: CLOSING SERVER")
         self.close_threads = True
 
     def start(self):

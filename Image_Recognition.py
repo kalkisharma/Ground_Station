@@ -12,7 +12,7 @@ from realsense_read import RealSenseRead as rsRead
 import Video_Capture
 
 from image_recognition.package import detect_package
-from image_recognition.qr import detect_qr, store_qr, display_qr
+from image_recognition.qr import detect_qr, store_qr, display_qr, log_shelf, log_package
 from image_recognition.alpha_numeric import detect_OCR
 
 class MAVImageRecognition:
@@ -32,26 +32,29 @@ class MAVImageRecognition:
         while not self.close_threads:
             #store_qr()
             #display_qr()
-            if Shared.data.detect_qr_flag:
 
-                detect_qr()
-            elif Shared.data.detect_package_flag:
-                detect_package()
-            elif Shared.data.detect_an_flag:
-                detect_OCR()
+            #if Shared.data.detect_qr_flag:
+
+            #    detect_qr()
+
+            #elif Shared.data.detect_package_flag:
+            #    detect_package()
+            #elif Shared.data.detect_an_flag:
+            #    detect_OCR()
+            """
             elif Shared.data.find_shelf:
 
                 detect_qr()
 
                 if Shared.data.image_data['data']==Shared.data.shelf_number[0]:
-                    logging.info("FOUND SHELF VIA QR")
+                    print("INFO: FOUND SHELF VIA QR")
 
                     while Shared.data.find_shelf:
 
                         detect_OCR()
 
                         if Shared.data.image_data['data']==Shared.data.shelf_number[1]:
-                            logging.info("FOUND SHELF VIA AN")
+                            print("INFO: FOUND SHELF VIA AN")
                             Shared.data.find_shelf = False
 
             elif Shared.data.find_shelf_row:
@@ -59,20 +62,45 @@ class MAVImageRecognition:
                 detect_qr()
 
                 if Shared.data.image_data['data']==Shared.data.shelf_row[0]:
-                    logging.info("FOUND SHELF ROW VIA QR")
+                    print("INFO: FOUND SHELF ROW VIA QR")
 
                     while Shared.data.find_shelf_row:
 
                         detect_OCR()
 
                         if Shared.data.image_data['data']==Shared.data.shelf_row[1]:
-                            logging.info("FOUND SHELF ROW VIA AN")
+                            print("INFO: FOUND SHELF ROW VIA AN")
                             print(Shared.data.image_data)
                             Shared.data.find_shelf_row = False
 
             elif Shared.data.log_package_flag:
 
                 detect_qr()
+            """
+            if Shared.data.log_package_flag:
+                
+                while len(Shared.data.package_list)!=0 and len(Shared.data.current_package)!=Shared.data.npackages:
+
+                    #detect_qr()
+                    log_package()
+
+                    if self.close_threads:
+
+                        return
+
+                    if Shared.data.current_shelf!='':
+
+                        Shared.data.package_log[Shared.data.current_shelf] = Shared.data.current_package
+
+                        print(f"INFO: SHELF ID: {Shared.data.current_shelf}\nASSOCIATED PACKAGES: {Shared.data.current_package}")
+
+                        Shared.data.current_shelf = ''
+                        Shared.data.current_package = []
+
+                    #Shared.data.frame_image_recognition = np.copy(Shared.data.frame)
+
+
+                Shared.data.log_package_flag = False
 
             else:
 

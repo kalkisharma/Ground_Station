@@ -102,13 +102,14 @@ class command_page(tk.Frame):
         #self.create_listener_canvas()
 
         #self.create_graph_canvas()
-        self.create_video_canvas(_row=0, _column=0)
+        self.create_video_canvas(_row=0, _column=0, _rowspan=10, _columnspan=10)
         self.create_video_textbox(_row=10, _column=10)
         self.create_image_buttons(_row=10, _column=15)
-        self.create_checklist(_row=0, _column=20)
+        self.create_checklist(_row=0, _column=20, _rowspan=10, _columnspan=10)
         #self.create_package_buttons(_row=5, _column=1)
         #self.create_movement_buttons(_row=0, _column=2)
         self._video()
+        Shared.data.GUI_STARTED_FLAG = True
         #self._plot()
         #self._listen_check()
 
@@ -116,9 +117,6 @@ class command_page(tk.Frame):
         #self.test()
 
     def create_checklist(self, _row=1, _column=1, _rowspan=1, _columnspan=1):
-
-        _rowspan=10
-        _columnspan=10
 
         self.task_canvas = tk.Canvas(self, bg='gray90')#, width = width, height = height)
         Shared.data.task_canvas = self.task_canvas
@@ -129,10 +127,30 @@ class command_page(tk.Frame):
         self.task_canvas.create_text(30, 17.5, anchor=tk.W, font=("Times", 14),
             text="Takeoff")
 
-        Shared.data.aisle_indicator = self.task_canvas.create_oval(10, 30, 25, 45, outline="black",
+        Shared.data.takeoff_flag_indicator = self.task_canvas.create_oval(10, 30, 25, 45, outline="black",
             fill="white", width=1)
         self.task_canvas.create_text(30, 37.5, anchor=tk.W, font=("Times", 14),
-            text="Detect Aisle")
+            text="Store Flag")
+
+        Shared.data.log_package_indicator = self.task_canvas.create_oval(10, 50, 25, 65, outline="black",
+            fill="white", width=1)
+        self.task_canvas.create_text(30, 57.5, anchor=tk.W, font=("Times", 14),
+            text="Logging Packages")
+
+        Shared.data.pickup_indicator = self.task_canvas.create_oval(10, 70, 25, 85, outline="black",
+            fill="white", width=1)
+        self.task_canvas.create_text(30, 77.5, anchor=tk.W, font=("Times", 14),
+            text="Searching for Pickup")
+
+        Shared.data.land_flag_indicator = self.task_canvas.create_oval(10, 90, 25, 105, outline="black",
+            fill="white", width=1)
+        self.task_canvas.create_text(30, 97.5, anchor=tk.W, font=("Times", 14),
+            text="Match Flag")
+
+        Shared.data.land_indicator = self.task_canvas.create_oval(10, 110, 25, 125, outline="black",
+            fill="white", width=1)
+        self.task_canvas.create_text(30, 117.5, anchor=tk.W, font=("Times", 14),
+            text="Land")
 
     def create_movement_buttons(self, _row=1, _column=1, _rowspan=1, _columnspan=1):
 
@@ -191,7 +209,7 @@ class command_page(tk.Frame):
         if Shared.data.log_package_flag:
             self.log_packages_button.config(relief=tk.RAISED)
             Shared.data.log_package_flag = False
-            logging.info(f"PACKAGE LOG VALUES: {Shared.data.package_log}")
+            print(f"INFO: PACKAGE LOG VALUES: {Shared.data.package_log}")
         else:
             self.log_packages_button.config(relief=tk.SUNKEN)
             Shared.data.log_package_flag = True
@@ -246,9 +264,6 @@ class command_page(tk.Frame):
         width = Shared.data.video_width
         height = Shared.data.video_height
 
-        _rowspan=10
-        _columnspan=10
-
         self.video_canvas = tk.Canvas(self, bg='blue', width = width, height = height)#, width=1000, height=1000)
         self.video_canvas.grid(row=_row, column=_column, rowspan=_rowspan, columnspan=_columnspan)
 
@@ -263,12 +278,12 @@ class command_page(tk.Frame):
 
     def create_video_textbox(self, _row=0, _column=0, _rowspan=1, _columnspan=1):
 
-        self.curr_pos_label = tk.Label(self, text=f'Current Position\nx: {round(Shared.data.current_pos[0],2)}\ny: {round(Shared.data.current_pos[1],2)}\nz: {round(Shared.data.current_pos[2],2)}')
+        self.curr_pos_label = tk.Label(self, text=f'Current Position\tx: {round(Shared.data.current_pos[0],2)}\ty: {round(Shared.data.current_pos[1],2)}\tz: {round(Shared.data.current_pos[2],2)}')
         self.curr_pos_label.grid(row=_row, column=_column, rowspan=_rowspan, columnspan=_columnspan)
 
-        _row+=1
-        self.desired_pos_label = tk.Label(self, text=f'Desired Position\nx: {round(Shared.data.desired_pos[0],2)}\ny: {round(Shared.data.desired_pos[1],2)}\nz: {round(Shared.data.desired_pos[2],2)}')
-        self.desired_pos_label.grid(row=_row, column=_column, rowspan=_rowspan, columnspan=_columnspan)
+        #_row+=1
+        #self.desired_pos_label = tk.Label(self, text=f'Desired Position\nx: {round(Shared.data.desired_pos[0],2)}\ny: {round(Shared.data.desired_pos[1],2)}\nz: {round(Shared.data.desired_pos[2],2)}')
+        #self.desired_pos_label.grid(row=_row, column=_column, rowspan=_rowspan, columnspan=_columnspan)
 
     def _video(self):
 
@@ -281,21 +296,21 @@ class command_page(tk.Frame):
         frame_fpv = cv2.cvtColor(Shared.data.frame_fpv, cv2.COLOR_BGR2RGB)
         #Shared.data.video_lock.release()
 
-        if ret:
-            self.photo = PIL.ImageTk.PhotoImage(image = PIL.Image.fromarray(frame))
-            self.video_canvas.create_image(0, 0, image=self.photo, anchor=tk.NW)
 
-            self.photo_ir = PIL.ImageTk.PhotoImage(image = PIL.Image.fromarray(frame_ir))
-            self.video_canvas_ir.create_image(0, 0, image=self.photo_ir, anchor=tk.NW)
+        self.photo = PIL.ImageTk.PhotoImage(image = PIL.Image.fromarray(frame))
+        self.video_canvas.create_image(0, 0, image=self.photo, anchor=tk.NW)
 
-            self.photo_fpv = PIL.ImageTk.PhotoImage(image = PIL.Image.fromarray(frame_fpv))
-            self.video_canvas_fpv.create_image(0, 0, image=self.photo_fpv, anchor=tk.NW)
+        self.photo_ir = PIL.ImageTk.PhotoImage(image = PIL.Image.fromarray(frame_ir))
+        self.video_canvas_ir.create_image(0, 0, image=self.photo_ir, anchor=tk.NW)
+
+        self.photo_fpv = PIL.ImageTk.PhotoImage(image = PIL.Image.fromarray(frame_fpv))
+        self.video_canvas_fpv.create_image(0, 0, image=self.photo_fpv, anchor=tk.NW)
 
         # Update pixel location
-        self.desired_pos_label.config(text=f'Desired Position\nx: {round(Shared.data.desired_pos[0],2)}\ny: {round(Shared.data.desired_pos[1],2)}\nz: {round(Shared.data.desired_pos[2],2)}')
+        #self.desired_pos_label.config(text=f'Desired Position\nx: {round(Shared.data.desired_pos[0],2)}\ny: {round(Shared.data.desired_pos[1],2)}\nz: {round(Shared.data.desired_pos[2],2)}')
 
         # Update current position
-        self.curr_pos_label.config(text=f'Current Position\nx: {round(Shared.data.current_pos[0],2)}\ny: {round(Shared.data.current_pos[1],2)}\nz: {round(Shared.data.current_pos[2],2)}')
+        self.curr_pos_label.config(text=f'Current Position\tx: {round(Shared.data.current_pos[0],2)}\ty: {round(Shared.data.current_pos[1],2)}\tz: {round(Shared.data.current_pos[2],2)}')
         time_end = time.time()
 
         fps = 1/(time_end-time_start)

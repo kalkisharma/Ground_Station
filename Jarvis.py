@@ -46,7 +46,7 @@ class Jarvis:
 
     def hover(self):
         self.behavior = "HOVER"
-        logging.info("HOVER")
+        print("INFO: HOVER")
 
         #current_pos, current_yaw = self.get_current_pos_yaw()
         desired_pos, desired_yaw = self.get_current_pos_yaw()
@@ -56,7 +56,7 @@ class Jarvis:
 
     def takeoff(self):
         self.behavior = "TAKEOFF"
-        logging.info("TAKING OFF")
+        print("INFO: TAKING OFF")
 
         desired_pos = [0, 0, self.takeoff_altitude]
         desired_yaw = 0
@@ -69,7 +69,7 @@ class Jarvis:
 
     def land(self):
         self.behavior = "LANDING"
-        logging.info("LANDING")
+        print("INFO: LANDING")
 
         current_pos, current_yaw = self.get_current_pos_yaw()
         desired_pos = [current_pos[0], current_pos[1], 0]
@@ -81,22 +81,22 @@ class Jarvis:
             current_pos, current_yaw = self.get_current_pos_yaw()
 
     def enable_offboard(self):
-        logging.info("ENABLING OFFBOARD")
+        print("INFO: ENABLING OFFBOARD")
         self.set_msg_payload_send(92, 1, 0, 0, 0, 0, 0, 0)
         Shared.data.audio_command = ('', time.time())
 
     def disable_offboard(self):
-        logging.info("DISALBING OFFBOARD")
+        print("INFO: DISALBING OFFBOARD")
         self.set_msg_payload_send(92, 0, 0, 0, 0, 0, 0, 0)
         Shared.data.audio_command = ('', time.time())
 
     def arm_pixhawk(self):
-        logging.info("ARMING PIXHAWK")
+        print("INFO: ARMING PIXHAWK")
         self.set_msg_payload_send(400, 1, 0, 0, 0, 0, 0, 0)
         Shared.data.audio_command = ('', time.time())
 
     def disarm_pixhawk(self):
-        logging.info("DISARMING PIXHAWK")
+        print("INFO: DISARMING PIXHAWK")
         self.set_msg_payload_send(400, 0, 0, 0, 0, 0, 0, 0)
         Shared.data.audio_command = ('', time.time())
 
@@ -113,7 +113,7 @@ class Jarvis:
 
     def takeoff(self):
         self.behavior = "TAKEOFF"
-        logging.info("TAKING OFF")
+        print("INFO: TAKING OFF")
         self.setpoint = [0, 0, self.takeoff_altitude]
         self.setpoints.append(self.setpoint)
         while not self.audio.listening and self.dist_to_setpoint(self.setpoint) > 0.1:
@@ -121,11 +121,11 @@ class Jarvis:
 
     def center_over_home(self):
         self.behavior = "GO TO HELIPAD"
-        logging.info("GOING TO HELIPAD")
+        print("INFO: GOING TO HELIPAD")
         self.image.tag_name = "HOME"
         while self.image.x == 100 or self.image.y == 100:
             pass
-        logging.info(f"TAG LOCATED AT ({self.image.x},{self.image.y})")
+        print(f"INFO: TAG LOCATED AT ({self.image.x},{self.image.y})")
         self.setpoint = [self.image.x, self.image.y, self.server.current_z]
         self.setpoints.append(self.setpoint)
         while self.dist_to_setpoint(self.setpoint) > 0.3:
@@ -134,11 +134,11 @@ class Jarvis:
 
     def center_over_drop(self):
         self.behavior = "GO TO DROPOFF"
-        logging.info("GOING TO DROPOFF")
+        print("INFO: GOING TO DROPOFF")
         self.image.tag_name = "DROPOFF"
         while self.image.x == 100 or self.image.y == 100:
             pass
-        logging.info(f"TAG LOCATED AT ({self.image.x},{self.image.y})")
+        print(f"INFO: TAG LOCATED AT ({self.image.x},{self.image.y})")
         self.setpoint = [self.image.x, self.image.y, self.server.current_z]
         self.setpoints.append(self.setpoint)
         while self.dist_to_setpoint(self.setpoint) > 0.3:
@@ -147,7 +147,7 @@ class Jarvis:
 
     def drop_package(self):
         self.behavior = "DROPPING PACKAGE"
-        logging.info("DROPPING PACKAGE")
+        print("INFO: DROPPING PACKAGE")
         self.open_servo()
         while jarvis.server.msg_payload_send[0] != 0:
             pass
@@ -157,7 +157,7 @@ class Jarvis:
 
     def pickup_package(self):
         self.behavior = "PICKUP PACKAGE"
-        logging.info("PICKUP PACKAGE")
+        print("INFO: PICKUP PACKAGE")
         self.setpoint = [self.server.current_x, self.server.current_y, self.pickup_altitude]
         self.setpoints.append(self.setpoint)
         while self.dist_to_setpoint(self.setpoint) > 0.1:
@@ -172,11 +172,11 @@ class Jarvis:
 
     def center_over_pickup(self):
         self.behavior = "GO TO PICKUP"
-        logging.info("GOING TO PICKUP")
+        print("INFO: GOING TO PICKUP")
         self.image.tag_name = "PICKUP"
         while self.image.x == 100 or self.image.y == 100:
             pass
-        logging.info(f"TAG LOCATED AT ({self.image.x},{self.image.y})")
+        print(f"INFO: TAG LOCATED AT ({self.image.x},{self.image.y})")
         self.setpoint = [self.image.x, self.image.y, self.server.current_z]
         self.setpoints.append(self.setpoint)
         while self.dist_to_setpoint(self.setpoint) > 0.3:
@@ -185,7 +185,7 @@ class Jarvis:
 
     def hover(self, start_time, timeout=5):
         self.behavior = "HOVER"
-        logging.info("HOVERING")
+        print("INFO: HOVERING")
         self.setpoint = [self.server.current_x, self.server.current_y, self.server.current_z]
         self.setpoints.append(self.setpoint)
         while not self.audio.listening and time.time() < start_time + timeout:
@@ -193,7 +193,7 @@ class Jarvis:
 
     def achieve_setpoint(self, setpoint):
         self.behavior = "ACHIEVE SETPOINT"
-        logging.info(f"ACHIEVING SETPOINT: ({setpoint[0]},{setpoint[1]},{setpoint[2]})")
+        print(f"INFO: ACHIEVING SETPOINT: ({setpoint[0]},{setpoint[1]},{setpoint[2]})")
         self.setpoint = setpoint
         self.setpoints.append(setpoint)
         while not self.audio.listening and self.dist_to_setpoint(self.setpoint) > 0.3:
@@ -201,7 +201,7 @@ class Jarvis:
 
     def land(self):
         self.behavior = "LAND"
-        logging.info("LAND")
+        print("INFO: LAND")
         self.setpoint = [self.server.current_x, self.server.current_y, self.setpoints[0][2]]
         self.setpoints.append(self.setpoint)
         #self.open_servo()
@@ -291,6 +291,6 @@ def main(jarvis):
         jarvis.hover(time.time(), 5)
         jarvis.land()
         """
-        logging.info("ALL TASKS COMPLETED")
+        print("INFO: ALL TASKS COMPLETED")
 
         break
