@@ -27,6 +27,7 @@ class MyVideoCapture:
         self.height = self.vid.get(cv2.CAP_PROP_FRAME_HEIGHT)
         Shared.data.video_width = self.width
         Shared.data.video_height = self.height
+        #print(self.width, self.height)
     """
     def __init__(self, video_source=[0,0], show_video=False):
         self.close_thread = False
@@ -46,6 +47,7 @@ class MyVideoCapture:
         self.height = self.vid.get(cv2.CAP_PROP_FRAME_HEIGHT)
         Shared.data.video_width = self.width
         Shared.data.video_height = self.height
+        print(self.width, self.height)
     """
     # Release the video source when the object is destroyed
     def __del__(self):

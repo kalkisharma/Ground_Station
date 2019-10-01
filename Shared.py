@@ -78,16 +78,17 @@ class data:
         '11A', '12A', '13A', '14A',
         '21A', '22A', '23A', '24A',
         '11B', '12B', '13A', '14B',
-        '21B', '22B', '23B', '24B'
+        '21B', '22B', '23B', '24B', '1004'
     ]
     shelf_number = ['1', '11']
     shelf_row = ['1004', '21B']
     package_log = {}
     current_shelf = ''
-    package_list = ['3', '2', '1', '0']#['V166D', '5419N', 'N4915', '1779F', 'B527C']
+    package_list = ['1000', '1005']#['V166D', '5419N', 'N4915', '1779F', 'B527C']
     npackages = len(package_list)
     found_packages = []
     current_package = []
+    recorded_qr = []
 
     # position flags
     initial_pos_flag = False

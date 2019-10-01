@@ -106,6 +106,7 @@ class command_page(tk.Frame):
         self.create_video_textbox(_row=10, _column=10)
         self.create_image_buttons(_row=10, _column=15)
         self.create_checklist(_row=0, _column=20, _rowspan=10, _columnspan=10)
+        self.create_qr_label(_row=11, _column=10)#, _rowspan=10, _columnspan=10)
         #self.create_package_buttons(_row=5, _column=1)
         #self.create_movement_buttons(_row=0, _column=2)
         self._video()
@@ -115,6 +116,11 @@ class command_page(tk.Frame):
 
 
         #self.test()
+
+    def create_qr_label(self, _row=1, _column=1, _rowspan=1, _columnspan=1):
+
+        self.qr_label = tk.Label(self, text=f'Stored QR Codes: {Shared.data.package_list}')
+        self.qr_label.grid(row=_row, column=_column, rowspan=_rowspan, columnspan=_columnspan)
 
     def create_checklist(self, _row=1, _column=1, _rowspan=1, _columnspan=1):
 

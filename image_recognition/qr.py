@@ -7,6 +7,7 @@ import time
 import imutils
 import numpy as np
 import logging
+from playsound import playsound
 
 import Shared
 
@@ -206,11 +207,57 @@ def log_package():
                 print("INFO: FOUND {} BARCODE: {}".format(barcodeType, barcodeData))
                 Shared.data.package_list.remove(barcodeData)
                 Shared.data.found_packages.append(barcodeData)
-            if barcodeData in Shared.data.shelf_code:
+                Shared.data.recorded_qr.append(barcodeData)
+                print(Shared.data.found_packages)
+                playsound('audio_files/package_located.mp3')
+
+            elif barcodeData not in Shared.data.recorded_qr and barcodeData not in Shared.data.shelf_code:
+
+                Shared.data.recorded_qr.append(barcodeData)
+                print("INFO: {} NOT IN PACKAGE LIST".format(barcodeData))
+                playsound('audio_files/not_package.mp3')
+
+            elif barcodeData in Shared.data.shelf_code:
 
                 Shared.data.current_shelf = barcodeData
 
+                if len(Shared.data.found_packages) > 0:
+
+                    key = Shared.data.current_shelf
+                    log_dict = Shared.data.package_log
+                    values = Shared.data.found_packages
+
+                    if key in log_dict:
+                        for value in values:
+                            if value in log_dict[key]:
+                                pass
+                            else:
+                                log_dict[key].append(value)
+                    else:
+                        log_dict[key] = values
+
+                    Shared.data.package_log = log_dict
+
+                    print(f"INFO: LOG DICT: {Shared.data.package_log}")
+
+                    playsound('audio_files/save_package.mp3')
+
+                    if len(Shared.data.current_package)==0:
+
+                        Shared.data.current_package = Shared.data.found_packages
+                    else:
+
+                        Shared.data.current_package += Shared.data.found_packages
+                    #print(Shared.data.current_package)
+                    Shared.data.current_shelf = ''
+                    Shared.data.found_packages = []
+
                 return
+
+            else:
+
+                print("INFO: {} REPEATED".format(barcodeData))
+                playsound('audio_files/already_recorded.mp3')
             #Shared.data.frame_image_recognition = frame
         """
         for barcode_text in Shared.data.barcode_list:

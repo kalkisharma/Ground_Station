@@ -78,16 +78,31 @@ class MAVImageRecognition:
                 detect_qr()
             """
             if Shared.data.log_package_flag:
-                
-                while len(Shared.data.package_list)!=0 and len(Shared.data.current_package)!=Shared.data.npackages:
 
-                    #detect_qr()
+
+                sum = 0
+                #while len(Shared.data.package_list)!=0 or len(Shared.data.current_package)!=Shared.data.npackages:
+                while sum < Shared.data.npackages:
                     log_package()
 
                     if self.close_threads:
 
                         return
 
+                    sum = 0
+
+                    if Shared.data.package_log:
+                        for item in Shared.data.package_log:
+                            sum += len(item)
+                            print(sum)
+
+
+                Shared.data.log_package_flag = False
+
+            else:
+
+                Shared.data.frame_image_recognition = np.copy(Shared.data.frame)
+            """
                     if Shared.data.current_shelf!='':
 
                         Shared.data.package_log[Shared.data.current_shelf] = Shared.data.current_package
@@ -100,11 +115,9 @@ class MAVImageRecognition:
                     #Shared.data.frame_image_recognition = np.copy(Shared.data.frame)
 
 
-                Shared.data.log_package_flag = False
+                
+            """
 
-            else:
-
-                Shared.data.frame_image_recognition = np.copy(Shared.data.frame)
 
         return
 

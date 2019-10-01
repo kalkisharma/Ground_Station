@@ -2,6 +2,7 @@ import threading
 import logging
 import cv2
 import time
+from playsound import playsound
 
 import TCP_Server
 import Image_Recognition
@@ -11,10 +12,14 @@ import Video_Capture
 import audio_recorder
 import tasks
 import Shared
+from qr_data.read_qr import obtain_qr_from_file
 
 def main():
 
     # Set Global flags
+    CSV_FILE = './qr_data/qr_data.csv' # .csv file which contains qr data
+    NROW = 1 # Row id for qr package recognition
+    RUN_CSVREADER_FLAG = True
     RUN_TASK_FLAG = True
     RUN_SERVER_FLAG = True
     RUN_WEBCAM_FLAG = False
@@ -57,6 +62,14 @@ def main():
                                 'appsink sync=false', cv2.CAP_GSTREAMER]
 
     """
+
+    if RUN_CSVREADER_FLAG:
+
+        playsound('audio_files/store_qr.mp3')
+        print(f"INFO: READING CSV FILE {CSV_FILE}, AT ROW {NROW}")
+        Shared.data.package_list = obtain_qr_from_file(CSV_FILE, NROW)
+        Shared.data.npackages = len(Shared.data.package_list)
+        print(f"INFO: QR CODES: {Shared.data.package_list}")
 
     if RUN_TASK_FLAG:
 
@@ -143,5 +156,5 @@ def main():
 if __name__ == "__main__":
     # logging.basicConfig(filename="log.log", filemode="w", format='%(levelname)s:%(message)s', level=logging.INFO)
     logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.INFO)
-    print("INFO: HERE")
+
     main()

@@ -28,7 +28,7 @@ class TaskScheduler:
 
         self.takeoff()
         #self.store_flag()
-        #self.log_packages()
+        self.log_packages()
         #self.locate_pickup()
 
         return
@@ -87,7 +87,7 @@ class TaskScheduler:
         """
 
         print("INFO: LOGGING PACKAGES!")
-
+        playsound('audio_files/logging_start.mp3')
         Shared.data.log_package_flag = True
 
         while Shared.data.log_package_flag and not self.close_thread:
@@ -101,6 +101,7 @@ class TaskScheduler:
                 return
 
         print("INFO: PACKAGES LOGGED!")
+        playsound('audio_files/logging_end.mp3')
         Shared.data.task_canvas.itemconfig(Shared.data.log_package_indicator, fill='green2')
 
     def locate_pickup(self):
