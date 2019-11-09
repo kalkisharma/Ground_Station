@@ -1,0 +1,15 @@
+#!/bin/bash
+
+cd ./models/research/
+protoc object_detection/protos/*.proto --python_out=.
+export PYTHONPATH=$PYTHONPATH:`pwd`:`pwd`/slim
+cd ../../
+
+#source ./venv/bin/activate
+
+if [ "$#" = 1 ]
+then
+	./venv/bin/python main.py $1
+else
+	./venv/bin/python main.py
+fi

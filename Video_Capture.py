@@ -14,19 +14,29 @@ class MyVideoCapture:
         if self.type=='gstreamer':
 
             self.vid = cv2.VideoCapture(video_source[0], video_source[1])
+            Shared.data.gui_video_height = self.vid.get(cv2.CAP_PROP_FRAME_HEIGHT)
+            Shared.data.gui_video_width = self.vid.get(cv2.CAP_PROP_FRAME_WIDTH)
+
         else:
 
             self.vid = cv2.VideoCapture(video_source)
+            self.vid.set(cv2.CAP_PROP_FRAME_WIDTH, Shared.data.gui_video_width)
+            self.vid.set(cv2.CAP_PROP_FRAME_HEIGHT, Shared.data.gui_video_height)
 
 
         if not self.vid.isOpened():
             raise ValueError("Unable to open video source", self.video_source)
 
         # Get video source width and height
-        self.width = self.vid.get(cv2.CAP_PROP_FRAME_WIDTH)
-        self.height = self.vid.get(cv2.CAP_PROP_FRAME_HEIGHT)
+        self.width = Shared.data.gui_video_width
+        self.height = Shared.data.gui_video_height
+        #self.width = self.vid.get(cv2.CAP_PROP_FRAME_WIDTH)
+        #self.height = self.vid.get(cv2.CAP_PROP_FRAME_HEIGHT)
+        print (self.width)
+        print (self.height)
         Shared.data.video_width = self.width
         Shared.data.video_height = self.height
+        #print(self.width, self.height)
     """
     def __init__(self, video_source=[0,0], show_video=False):
         self.close_thread = False
@@ -46,6 +56,7 @@ class MyVideoCapture:
         self.height = self.vid.get(cv2.CAP_PROP_FRAME_HEIGHT)
         Shared.data.video_width = self.width
         Shared.data.video_height = self.height
+        print(self.width, self.height)
     """
     # Release the video source when the object is destroyed
     def __del__(self):
@@ -63,6 +74,7 @@ class MyVideoCapture:
             ret, frame = self.vid.read()
             if ret:
                 # Return a boolean success flag and the current frame converted to BGR
+                Shared.data.frame_num += 1
                 return (ret, frame) #cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
             else:
                 return (ret, None)
@@ -84,7 +96,7 @@ class MyVideoCapture:
 
             ret, frame = self.get_frame()
 
-            if self.type=='fpv':
+            if self.type=='gstreamer':
                 Shared.data.frame = np.copy(frame)
                 Shared.data.ret = ret
             else:
