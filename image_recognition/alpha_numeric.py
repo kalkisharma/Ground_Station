@@ -9,12 +9,13 @@ import Shared
 
 def detect_OCR():
     frame = np.copy(Shared.data.frame)
+    found_shelf = False
 
     text = "Detecting AN"
     cv2.putText(frame, text, (400, 50), cv2.FONT_HERSHEY_SIMPLEX,
         1, (0, 255, 0), 2)
 
-    output = {'data': [], 'time':time.time(),'type':"AN",'imgSize':[frame.shape[0],frame.shape[1]]}
+    #output = {'data': [], 'time':time.time(),'type':"AN",'imgSize':[frame.shape[0],frame.shape[1]]}
     shelf_tag_width = 130
     shelf_tag_height = 65
     aisle_tag_width = 130
@@ -110,10 +111,9 @@ def detect_OCR():
                     if 0.7 * (dilated.shape[0] * dilated.shape[1]) > textarea > 0.3 * (
                             dilated.shape[0] * dilated.shape[1]) \
                             and ((Cx - 0.5 * dilated.shape[1]) ** 2 + (Cy - 0.5 * dilated.shape[0]) ** 2) ** (
-                    0.5) < 0.25 * dilated.shape[0] \
-                            and 0.7 > h / w > 0.2:
+                            0.5) < 0.25 * dilated.shape[0] \
+                            and 0.7 > h / w > 0.3:
                         isText = True
-                        #print("HERE")
                         break
 
                 if isText:
@@ -129,26 +129,26 @@ def detect_OCR():
                                                        config='-c tessedit_char_whitelist=0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ')
                     #print(len(text))
                     if len(text) == 3:
-                        if Shared.data.find_shelf_row:
-                            if text==Shared.data.shelf_row[1]:
-                                pixel_data = (x, y, rectH/frame.shape[0], rectW/frame.shape[1])
-                                h = int(rectH)
-                                w = int(rectW)
-                                x = int(x)
-                                y = int(y)
-                                #print(x,y,w,h)
-                                data = text
-                                cv2.rectangle(frame, (x - w//2, y - h//2), (x + w//2, y + h//2), (0, 0, 255), 2)
-                                #cv2.circle(frame, (x,y), 10, (0,0,255))
-                                output['data'].append(["Shelf",text, np.array([x, y, rectH/frame.shape[0], rectW/frame.shape[1]])])
-                                Shared.data.frame_image_recognition = frame
-                                Shared.data.image_data = {
-                                    'data' : data, # List of values obtained from detection (e.g. qr code values)
-                                    'time' : time.time(),
-                                    'type' : 'AN',
-                                    'pixel' :  pixel_data# List of pixel width and height relative to frame size
-                                }
-                                break
+                        if text in Shared.data.shelf_code:
+                            pixel_data = (x, y, rectH/frame.shape[0], rectW/frame.shape[1])
+                            h = int(rectH)
+                            w = int(rectW)
+                            x = int(x)
+                            y = int(y)
+                            #print(x,y,w,h)
+                            data = text
+                            cv2.rectangle(frame, (x - w//2, y - h//2), (x + w//2, y + h//2), (0, 0, 255), 2)
+                            #cv2.circle(frame, (x,y), 10, (0,0,255))
+                            #output['data'].append(["Shelf",text, np.array([x, y, rectH/frame.shape[0], rectW/frame.shape[1]])])
+                            """Shared.data.frame_image_recognition = frame
+                            Shared.data.image_data = {
+                                'data' : data, # List of values obtained from detection (e.g. qr code values)
+                                'time' : time.time(),
+                                'type' : 'AN',
+                                'pixel' :  pixel_data# List of pixel width and height relative to frame size
+                            }"""
+                            found_shelf = True
+                            break
 
             """elif 1.2 > aspect_ratio > 0.8:
                 # We're pretty sure now we have the shelf label corners. Now we need to rotate and extract text
@@ -228,7 +228,7 @@ def detect_OCR():
                                 # print(x,y,w,h)
                                 data = text
                                 cv2.rectangle(frame, (x - w // 2, y - h // 2), (x + w // 2, y + h // 2), (0, 0, 255), 2)
-                                output['data'].append(
+                                #output['data'].append(
                                     ["Aisle", text, np.array([x, y, rectH / frame.shape[0], rectW / frame.shape[1]])])
                                 Shared.data.frame_image_recognition = frame
                                 Shared.data.image_data = {
@@ -246,3 +246,4 @@ def detect_OCR():
         'type' : 'AN',
         'pixel' :  pixel_data# List of pixel width and height relative to frame size
     }
+    return found_shelf

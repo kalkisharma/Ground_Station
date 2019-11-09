@@ -1,10 +1,10 @@
-# MERGE OLLIE! MERGE!
 import cv2
 import apriltag
 import math
 import time
 import imutils
 import logging
+import image_recognition.qrEKF as qrEKF
 import numpy as np
 import Shared
 import threading
@@ -12,7 +12,7 @@ from realsense_read import RealSenseRead as rsRead
 import Video_Capture
 
 from image_recognition.package import detect_package
-from image_recognition.qr import detect_qr, store_qr, display_qr, log_shelf, log_package
+from image_recognition.qr import detect_qr, store_qr, display_qr, log_shelf, log_package, log_package_v2, log_package_v3
 from image_recognition.alpha_numeric import detect_OCR
 
 class MAVImageRecognition:
@@ -20,7 +20,6 @@ class MAVImageRecognition:
 
         self.close_threads = False
         self.test_ImgRec = True
-
         self.outImg = np.zeros((480,640,3), np.uint8)
 
     def compute_pixel_dist(self):
@@ -79,7 +78,7 @@ class MAVImageRecognition:
             """
             if Shared.data.log_package_flag:
 
-
+                """
                 sum = 0
                 #while len(Shared.data.package_list)!=0 or len(Shared.data.current_package)!=Shared.data.npackages:
                 while sum < Shared.data.npackages:
@@ -95,9 +94,85 @@ class MAVImageRecognition:
                         for item in Shared.data.package_log:
                             sum += len(item)
                             print(sum)
+                """
+                Shared.data.ekfTime1 = time.time()
+                Shared.data.ekf = qrEKF.qrEKF()
+                x = []
+                y = []
+                while len(Shared.data.save_package)!=Shared.data.npackages:
 
+                    if Shared.data.with_an:
+                        log_package_v3()
+                    else:
+                        log_package_v2()
 
+                    if self.close_threads:
+
+                        return
+                    fps = Shared.data.ekf.fpStateDB
+                    vX = Shared.data.current_pos[0]
+                    vY = Shared.data.current_pos[1]
+                    vZ = Shared.data.current_pos[2]
+                    if len(fps) == 1:
+                        POS = qrEKF.fpLocEstPos(fps[0])
+                        Shared.data.shelf_dist = math.sqrt((POS[0]-vX)**2+(POS[1]-vY)**2)
+
+                    elif len(fps) > 1:
+                        for fp in fps:
+                            POS = qrEKF.fpLocEstPos(fp)
+                            x.append(POS[0])
+                            y.append(POS[1])
+                        #p0, p2 = np.polyfit(x,y,1)
+                        #p1 = 1
+                        #Shared.data.shelf_dist = abs(p0*vX + p1*vY + p2)/(math.sqrt(p0*p0 + p1*p1))
+                    #print(Shared.data.shelf_dist)
                 Shared.data.log_package_flag = False
+
+            elif Shared.data.find_pickup_flag and Shared.data.current_pos[0] < Shared.data.PACKAGE_OFFSET:
+
+                while Shared.data.find_pickup_flag:
+
+                    detect_package()
+
+                    if self.close_threads:
+
+                        return
+
+            elif Shared.data.store_flag_flag:
+                count = 0
+                while Shared.data.store_flag_flag:
+                    if Shared.data.frame_num%5 == 0: #count%5==0:
+                        val = Shared.data.nation.detectReferenceFlag(Shared.data.frame)
+                        Shared.data.frame_image_recognition = np.copy(Shared.data.frame)
+
+                        if val:
+                            for i in range(50):
+                                Shared.data.frame_image_recognition = np.copy(Shared.data.nation.detectedReferenceFlag)
+                                time.sleep(0.1)
+                            Shared.data.store_flag_flag = False
+                    count+=1
+                    if self.close_threads:
+
+                        return
+
+            elif Shared.data.find_land_flag:
+                count=0
+                while Shared.data.find_land_flag:
+                    if Shared.data.frame_num%5 == 0: #count%5==0:
+                        bbox = Shared.data.nation.detectCandidateFlag(Shared.data.frame)
+
+                        Shared.data.frame_image_recognition = np.copy(Shared.data.frame)
+
+                        if bbox is not None:# or len(bbox) > 0:
+                            cv2.rectangle(np.copy(Shared.data.frame), (bbox[1], bbox[0]), (bbox[3], bbox[2]), (255,0,0), 2)
+                            for i in range(50):
+                                Shared.data.frame_image_recognition = np.copy(Shared.data.frame)
+                                time.sleep(0.1)
+                            Shared.data.find_land_flag = False
+                    count+=1
+                    if self.close_threads:
+
+                        return
 
             else:
 
@@ -114,8 +189,6 @@ class MAVImageRecognition:
 
                     #Shared.data.frame_image_recognition = np.copy(Shared.data.frame)
 
-
-                
             """
 
 
