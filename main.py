@@ -86,7 +86,6 @@ def main():
         Shared.data.npackages = len(Shared.data.package_list)
         print(f"INFO: QR CODES: {Shared.data.package_list}")
 
-
     if RUN_SERVER_FLAG:
 
         server = TCP_Server.MAVServer()

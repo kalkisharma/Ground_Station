@@ -700,7 +700,9 @@ def log_package():
             else:
 
                 print("INFO: {} REPEATED".format(barcodeData))
+
                 #playsound('audio_files/already_recorded.mp3')
+
             #Shared.data.frame_image_recognition = frame
         """
         for barcode_text in Shared.data.barcode_list:

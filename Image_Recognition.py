@@ -189,8 +189,6 @@ class MAVImageRecognition:
 
                     #Shared.data.frame_image_recognition = np.copy(Shared.data.frame)
 
-
-
             """
 
 
