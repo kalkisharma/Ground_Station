@@ -1,3 +1,10 @@
 # Don't track content of these folders
 venv/
 __pycache__/
+models/
+IG/
+.idea/
+protoc-3.7.1-linux-x86_64.zip
+PX4_params/
+image_recognition/qr_locations.py
+QR_frame.png
